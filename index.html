@@ -362,6 +362,7 @@ footer a{color:var(--accent2);text-decoration:none;}
 
 <footer>
   <p>Carrusel AB · <a href="https://github.com" target="_blank">Ver en GitHub</a> · Hecho con ♡</p>
+  <p style="margin-top:4px;font-size:11px;color:#333;">v0.3 · <span id="vdate"></span></p>
 </footer>
 </div>
 
@@ -493,31 +494,37 @@ let sState={offX:0,offY:0,scale:1,imgW:0,imgH:0,cropW:0,cropH:0};
 const sCropOuter=document.getElementById('sCropOuter');
 const sCropCanvas=document.getElementById('sCropCanvas');
 
-['click'].forEach(ev=>document.getElementById('splitUpload').addEventListener(ev,()=>document.getElementById('splitFile').click()));
+document.getElementById('splitUpload').addEventListener('click',()=>document.getElementById('splitFile').click());
 document.getElementById('splitUpload').addEventListener('dragover',e=>{e.preventDefault();document.getElementById('splitUpload').classList.add('dragover');});
 document.getElementById('splitUpload').addEventListener('dragleave',()=>document.getElementById('splitUpload').classList.remove('dragover'));
 document.getElementById('splitUpload').addEventListener('drop',e=>{e.preventDefault();document.getElementById('splitUpload').classList.remove('dragover');if(e.dataTransfer.files[0])loadSImg(e.dataTransfer.files[0]);});
 document.getElementById('splitFile').addEventListener('change',e=>{if(e.target.files[0])loadSImg(e.target.files[0]);});
 
-const MAX_PX=4096;
+const MAX_PX=2048;
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#534AB7;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;pointer-events:none;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',2500);
+}
 function resizeImage(file,cb){
-  const r=new FileReader();
-  r.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const scale=Math.min(1,MAX_PX/Math.max(img.width,img.height));
-      if(scale===1){cb(img);return;}
-      const c=document.createElement('canvas');
-      c.width=Math.round(img.width*scale);
-      c.height=Math.round(img.height*scale);
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      const resized=new Image();
-      resized.onload=()=>cb(resized);
-      resized.src=c.toDataURL('image/jpeg',0.92);
-    };
-    img.src=ev.target.result;
+  showToast('Cargando imagen...');
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{
+    URL.revokeObjectURL(url);
+    const scale=Math.min(1,MAX_PX/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');
+    c.width=Math.round(img.width*scale);
+    c.height=Math.round(img.height*scale);
+    const ctx=c.getContext('2d');
+    ctx.drawImage(img,0,0,c.width,c.height);
+    const resized=new Image();
+    resized.onload=()=>{showToast('');cb(resized);};
+    resized.src=c.toDataURL('image/jpeg',0.88);
   };
-  r.readAsDataURL(file);
+  img.onerror=()=>{URL.revokeObjectURL(url);showToast('Error al cargar la imagen');};
+  img.src=url;
 }
 
 function loadSImg(file){
@@ -777,6 +784,7 @@ document.getElementById('mExport').addEventListener('click',()=>{
 });
 
 updateViewportAspect();
+document.getElementById('vdate').textContent=new Date('2025-04-21').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
 </script>
 </body>
 </html>

@@ -1,13 +1,9 @@
-const CACHE = 'carrusel-ab-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
+const VERSION = 'carrusel-ab-v0.3';
+const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
+    caches.open(VERSION).then(c => c.addAll(ASSETS))
   );
   self.skipWaiting();
 });
@@ -15,13 +11,28 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== VERSION).map(k => {
+        console.log('[SW] Borrando caché viejo:', k);
+        return caches.delete(k);
+      }))
     )
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
+  // Para index.html siempre ir a la red primero (network-first)
+  if(e.request.url.includes('index.html') || e.request.mode === 'navigate'){
+    e.respondWith(
+      fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(VERSION).then(c => c.put(e.request, clone));
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+  // Para el resto: cache-first
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
