@@ -499,10 +499,31 @@ document.getElementById('splitUpload').addEventListener('dragleave',()=>document
 document.getElementById('splitUpload').addEventListener('drop',e=>{e.preventDefault();document.getElementById('splitUpload').classList.remove('dragover');if(e.dataTransfer.files[0])loadSImg(e.dataTransfer.files[0]);});
 document.getElementById('splitFile').addEventListener('change',e=>{if(e.target.files[0])loadSImg(e.target.files[0]);});
 
-function loadSImg(file){
+const MAX_PX=4096;
+function resizeImage(file,cb){
   const r=new FileReader();
-  r.onload=ev=>{const img=new Image();img.onload=()=>{sImg=img;initSplit();document.getElementById('splitEditor').classList.remove('hidden');};img.src=ev.target.result;};
+  r.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const scale=Math.min(1,MAX_PX/Math.max(img.width,img.height));
+      if(scale===1){cb(img);return;}
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*scale);
+      c.height=Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      const resized=new Image();
+      resized.onload=()=>cb(resized);
+      resized.src=c.toDataURL('image/jpeg',0.92);
+    };
+    img.src=ev.target.result;
+  };
   r.readAsDataURL(file);
+}
+
+function loadSImg(file){
+  resizeImage(file,img=>{
+    sImg=img;initSplit();document.getElementById('splitEditor').classList.remove('hidden');
+  });
 }
 function initSplit(){
   const f=getFmt(),cropW=sN*f.w,cropH=f.h;
@@ -620,17 +641,13 @@ function handleMulti(files){
   const arr=Array.from(files).filter(f=>f.type.startsWith('image/'));
   const toAdd=arr.slice(0,10-mImages.length);let loaded=0;if(!toAdd.length)return;
   toAdd.forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{
-      const img=new Image();
-      img.onload=()=>{
-        const{cropW,cropH}=getCropDims();
-        const sc=fillScale(img.width,img.height,cropW,cropH);
-        const[ox,oy]=anchoredOffset(img.width,img.height,cropW,cropH,sc,0,1);
-        mImages.push({img,offX:ox,offY:oy,scale:sc,imgW:img.width,imgH:img.height,cropW,cropH});
-        loaded++;if(loaded===toAdd.length)renderMulti();
-      };img.src=ev.target.result;
-    };r.readAsDataURL(file);
+    resizeImage(file,img=>{
+      const{cropW,cropH}=getCropDims();
+      const sc=fillScale(img.width,img.height,cropW,cropH);
+      const[ox,oy]=anchoredOffset(img.width,img.height,cropW,cropH,sc,0,1);
+      mImages.push({img,offX:ox,offY:oy,scale:sc,imgW:img.width,imgH:img.height,cropW,cropH});
+      loaded++;if(loaded===toAdd.length)renderMulti();
+    });
   });
 }
 function rerenderAllMulti(){
