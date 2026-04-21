@@ -28,11 +28,9 @@ header{flex-shrink:0;background:rgba(15,15,15,0.95);backdrop-filter:blur(12px);b
 .steps-wrap{flex:1;overflow:hidden;position:relative;}
 .steps-track{display:flex;height:100%;transition:transform .4s cubic-bezier(.4,0,.2,1);}
 .step{min-width:100%;height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:16px 16px 80px;}
-.bottom-nav{flex-shrink:0;background:rgba(15,15,15,0.97);border-top:1px solid var(--border);padding:10px 16px calc(10px + env(safe-area-inset-bottom, 0px)) 16px;display:flex;gap:10px;align-items:center;z-index:50;position:relative;}
-.btn-back{flex:0 0 auto;height:42px;padding:0 16px;border-radius:var(--radius);border:1px solid var(--border2);background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text2);transition:background .12s;}
-.btn-back:hover{background:var(--bg3);}
-.btn-next{flex:1;height:42px;border-radius:var(--radius);border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.btn-next:hover{background:#3C3489;}
+.bottom-nav{display:none;}
+.btn-back{height:34px;padding:0 12px;border-radius:var(--radius);border:1px solid var(--border2);background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text2);}
+.btn-next{height:34px;padding:0 16px;border-radius:var(--radius);border:none;background:var(--accent);color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:4px;}
 .btn-next:disabled{background:var(--bg3);color:var(--text3);cursor:default;}
 .mode-tabs{display:flex;gap:2px;background:var(--bg2);border-radius:var(--radius);padding:3px;margin-bottom:16px;}
 .mode-tab{flex:1;padding:8px 0;font-size:13px;font-weight:500;text-align:center;border:none;background:none;cursor:pointer;border-radius:8px;color:var(--text2);font-family:'DM Sans',sans-serif;transition:background .15s,color .15s;}
@@ -65,7 +63,7 @@ input[type=file]{display:none;}
 .sort-item .remove-btn{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;}
 .sort-item:hover .remove-btn,.sort-item:active .remove-btn{opacity:1;}
 .sort-hint{font-size:11px;color:var(--text3);margin-bottom:8px;}
-.ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;row-gap:8px;}
+.ctrl-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;row-gap:6px;}
 .ctrl-label{font-size:12px;color:var(--text2);white-space:nowrap;}
 .split-btns,.anchor-btns{display:flex;gap:4px;}
 .split-btn,.anchor-btn{height:30px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;font-size:12px;font-weight:500;color:var(--text);font-family:'DM Sans',sans-serif;}
@@ -84,16 +82,16 @@ input[type=file]{display:none;}
 .swatch-custom.active{border-color:var(--accent2);}
 .swatch-custom input[type=color]{position:absolute;top:-4px;left:-4px;width:30px;height:30px;border:none;background:none;cursor:pointer;opacity:0;}
 .swatch-custom-preview{width:100%;height:100%;border-radius:50%;}
-.editor-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;}
-.crop-outer{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border2);cursor:grab;user-select:none;touch-action:none;background:#000;margin-bottom:8px;}
+.editor-label{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:4px;}
+.crop-outer{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border2);cursor:grab;user-select:none;touch-action:none;background:#000;margin-bottom:4px;}
 .crop-outer:active{cursor:grabbing;}
 .crop-canvas{display:block;width:100%;}
 .grid-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
-.zoom-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-.zoom-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;font-size:16px;color:var(--text);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.zoom-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.zoom-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;font-size:14px;color:var(--text);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .zoom-track{flex:1;accent-color:var(--accent);}
-.zoom-val{font-size:12px;color:var(--text2);min-width:36px;text-align:right;}
-.hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:10px;}
+.zoom-val{font-size:11px;color:var(--text2);min-width:32px;text-align:right;}
+.hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:6px;}
 .slices-row{display:flex;gap:4px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:6px;}
 .slice-wrap{flex:1;overflow:hidden;position:relative;}
 .slice-wrap canvas{width:100%;height:100%;display:block;}
@@ -139,7 +137,11 @@ input[type=file]{display:none;}
   <header>
     <div class="header-inner">
       <div class="logo"><div class="logo-icon">🎞</div>Carrusel AB</div>
-      <span class="step-label">Paso <span id="stepNum">1</span> de 3</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="step-label">Paso <span id="stepNum">1</span> de 3</span>
+        <button class="btn-back hidden" id="btnBack" onclick="goStep(currentStep-1)">← Atrás</button>
+        <button class="btn-next" id="btnNext" disabled onclick="goStep(currentStep+1)">Siguiente →</button>
+      </div>
     </div>
   </header>
   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
@@ -285,16 +287,13 @@ input[type=file]{display:none;}
         </div>
         <div class="tip" id="previewTip">Las fotos se descargan numeradas — subílas así a Instagram</div>
         <button class="restart-btn" onclick="restartApp()">← Hacer otro carrusel</button>
-        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:20px;">v1.2 · <a href="https://instagram.com/carruselab" style="color:var(--accent2);text-decoration:none;">@carruselab</a></p>
+        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:20px;">v1.3 · <a href="https://instagram.com/carruselab" style="color:var(--accent2);text-decoration:none;">@carruselab</a></p>
       </div>
 
     </div>
   </div>
 
-  <div class="bottom-nav">
-    <button class="btn-back hidden" id="btnBack" onclick="goStep(currentStep-1)">← Atrás</button>
-    <button class="btn-next" id="btnNext" disabled onclick="goStep(currentStep+1)">Siguiente →</button>
-  </div>
+
 </div>
 <div id="toast" style="opacity:0;"></div>
 
