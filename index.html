@@ -177,6 +177,7 @@ footer a{color:var(--accent2);text-decoration:none;}
 .panel.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -362,7 +363,7 @@ footer a{color:var(--accent2);text-decoration:none;}
 
 <footer>
   <p>Carrusel AB · <a href="https://github.com" target="_blank">Ver en GitHub</a> · Hecho con ♡</p>
-  <p style="margin-top:4px;font-size:11px;color:#333;">v0.6 · <span id="vdate"></span></p>
+  <p style="margin-top:4px;font-size:11px;color:#333;">v0.7 · <span id="vdate"></span></p>
 </footer>
 </div>
 
@@ -510,11 +511,38 @@ function showToast(msg,persist){
   clearTimeout(t._t);
   if(!persist)t._t=setTimeout(()=>{t.style.opacity='0';},2500);
 }
+function isHeic(file){
+  return file.type==='image/heic'||file.type==='image/heif'||file.name.toLowerCase().endsWith('.heic')||file.name.toLowerCase().endsWith('.heif');
+}
+function convertHeic(file,cb){
+  showToast('Convirtiendo foto HEIC...',true);
+  if(typeof heic2any==='undefined'){
+    showToast('Cargando conversor...',true);
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+    s.onload=()=>doConvert(file,cb);
+    s.onerror=()=>showToast('No se pudo cargar el conversor HEIC');
+    document.head.appendChild(s);
+  } else {
+    doConvert(file,cb);
+  }
+}
+function doConvert(file,cb){
+  heic2any({blob:file,toType:'image/jpeg',quality:0.88})
+    .then(blob=>cb(blob instanceof Array?blob[0]:blob))
+    .catch(()=>showToast('No se pudo convertir la foto HEIC'));
+}
 function resizeImage(file,cb){
+  if(isHeic(file)){
+    convertHeic(file,jpeg=>resizeBlob(jpeg,cb));
+    return;
+  }
+  resizeBlob(file,cb);
+}
+function resizeBlob(file,cb){
   showToast('Cargando imagen...',true);
   if(window.createImageBitmap){
-    const opts=file.type==='image/heic'||file.type==='image/heif'?{}:{};
-    createImageBitmap(file,opts).then(bitmap=>{
+    createImageBitmap(file).then(bitmap=>{
       try{
         const scale=Math.min(1,MAX_PX/Math.max(bitmap.width,bitmap.height));
         const c=document.createElement('canvas');
