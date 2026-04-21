@@ -362,7 +362,7 @@ footer a{color:var(--accent2);text-decoration:none;}
 
 <footer>
   <p>Carrusel AB · <a href="https://github.com" target="_blank">Ver en GitHub</a> · Hecho con ♡</p>
-  <p style="margin-top:4px;font-size:11px;color:#333;">v0.4 · <span id="vdate"></span></p>
+  <p style="margin-top:4px;font-size:11px;color:#333;">v0.5 · <span id="vdate"></span></p>
 </footer>
 </div>
 
@@ -510,6 +510,29 @@ function showToast(msg,persist){
 }
 function resizeImage(file,cb){
   showToast('Cargando imagen...',true);
+  if(window.createImageBitmap){
+    createImageBitmap(file).then(bitmap=>{
+      try{
+        const scale=Math.min(1,MAX_PX/Math.max(bitmap.width,bitmap.height));
+        const c=document.createElement('canvas');
+        c.width=Math.round(bitmap.width*scale);
+        c.height=Math.round(bitmap.height*scale);
+        c.getContext('2d').drawImage(bitmap,0,0,c.width,c.height);
+        bitmap.close();
+        const out=new Image();
+        out.onload=()=>{showToast('');cb(out);};
+        out.onerror=()=>showToast('Error al procesar');
+        out.src=c.toDataURL('image/jpeg',0.85);
+      }catch(err){showToast('Error: '+err.message);}
+    }).catch(err=>{
+      showToast('Intentando método alternativo...',true);
+      resizeViaFileReader(file,cb);
+    });
+  } else {
+    resizeViaFileReader(file,cb);
+  }
+}
+function resizeViaFileReader(file,cb){
   const r=new FileReader();
   r.onerror=()=>showToast('No se pudo leer el archivo');
   r.onload=ev=>{
@@ -522,10 +545,10 @@ function resizeImage(file,cb){
         c.width=Math.round(img.width*scale);
         c.height=Math.round(img.height*scale);
         c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-        const resized=new Image();
-        resized.onerror=()=>showToast('Error al redimensionar');
-        resized.onload=()=>{showToast('');cb(resized);};
-        resized.src=c.toDataURL('image/jpeg',0.85);
+        const out=new Image();
+        out.onload=()=>{showToast('');cb(out);};
+        out.onerror=()=>showToast('Error al redimensionar');
+        out.src=c.toDataURL('image/jpeg',0.85);
       }catch(err){showToast('Error: '+err.message);}
     };
     img.src=ev.target.result;
