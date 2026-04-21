@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Carrusel AB — Carruseles para Instagram</title>
+<meta name="description" content="Crea carruseles profesionales para Instagram. Divide fotos, ajusta encuadre, elige formato y descarga listo para publicar.">
+<meta name="theme-color" content="#534AB7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carrusel AB">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg2: #1a1a1a;
+  --bg3: #242424;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --accent: #534AB7;
+  --accent2: #7F77DD;
+  --accent-bg: rgba(83,74,183,0.12);
+  --green: #1D9E75;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.5;overscroll-behavior:none;}
+
+/* ── LAYOUT ── */
+.app-shell{display:flex;flex-direction:column;min-height:100svh;}
+header{position:sticky;top:0;z-index:100;background:rgba(15,15,15,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 16px;}
+.header-inner{max-width:640px;margin:0 auto;height:52px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;}
+.logo-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.header-badge{font-size:11px;background:var(--accent-bg);color:var(--accent2);border:1px solid rgba(83,74,183,0.3);padding:3px 8px;border-radius:20px;}
+
+main{flex:1;padding:20px 16px 40px;max-width:640px;margin:0 auto;width:100%;}
+
+/* ── INSTALL BANNER ── */
+.install-banner{display:none;align-items:center;gap:10px;background:var(--accent-bg);border:1px solid rgba(83,74,183,0.3);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;}
+.install-banner.show{display:flex;}
+.install-banner p{flex:1;font-size:13px;color:var(--text2);}
+.install-banner p strong{color:var(--text);}
+.btn-install{font-size:12px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;white-space:nowrap;}
+
+/* ── FORMAT SELECTOR ── */
+.section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.fmt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+.fmt-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 8px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;}
+.fmt-card:hover{border-color:var(--border2);}
+.fmt-card.active{border-color:var(--accent);background:var(--accent-bg);}
+.fmt-icon-wrap{display:flex;justify-content:center;align-items:flex-end;height:28px;margin-bottom:7px;}
+.fmt-rect{background:var(--text3);border-radius:3px;transition:background .15s;}
+.fmt-card.active .fmt-rect{background:var(--accent2);}
+.fmt-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:1px;}
+.fmt-dim{font-size:10px;color:var(--text3);}
+.fmt-card.active .fmt-name{color:var(--accent2);}
+.fmt-badge{display:inline-block;font-size:9px;background:var(--green);color:#fff;border-radius:3px;padding:1px 5px;margin-left:4px;vertical-align:middle;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;background:var(--bg2);border-radius:var(--radius);padding:3px;margin-bottom:20px;}
+.tab{flex:1;padding:8px 0;font-size:13px;font-weight:500;text-align:center;border:none;background:none;cursor:pointer;border-radius:8px;color:var(--text2);transition:background .15s,color .15s;font-family:'DM Sans',sans-serif;}
+.tab.active{background:var(--bg3);color:var(--text);border:1px solid var(--border);}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:2rem;text-align:center;cursor:pointer;background:var(--bg2);transition:border-color .2s,background .15s;margin-bottom:16px;}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:var(--accent-bg);}
+.upload-icon{font-size:28px;margin-bottom:8px;}
+.upload-title{font-size:14px;font-weight:500;margin-bottom:3px;}
+.upload-sub{font-size:12px;color:var(--text2);}
+input[type=file]{display:none;}
+.hidden{display:none!important;}
+
+/* ── CONTROL BAR ── */
+.ctrl-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);flex-wrap:wrap;row-gap:8px;}
+.ctrl-label{font-size:12px;color:var(--text2);white-space:nowrap;}
+.sep{width:1px;height:20px;background:var(--border2);flex-shrink:0;}
+.split-btns,.anchor-btns{display:flex;gap:4px;}
+.split-btn,.anchor-btn{height:30px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;font-size:12px;font-weight:500;color:var(--text);font-family:'DM Sans',sans-serif;transition:background .12s,border-color .12s;}
+.split-btn{width:34px;}
+.split-btn.active,.anchor-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.anchor-btn{width:28px;display:flex;align-items:center;justify-content:center;}
+.anchor-dot{width:10px;height:10px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:1.5px;}
+.anchor-dot span{width:2.5px;height:2.5px;border-radius:50%;background:var(--text3);}
+.anchor-btn.active .anchor-dot span{background:rgba(255,255,255,0.4);}
+.anchor-btn.active .anchor-dot span.hi{background:#fff;}
+.color-swatches{display:flex;gap:5px;align-items:center;}
+.swatch{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:border-color .12s;}
+.swatch.active{border-color:var(--accent2);}
+.swatch-custom{width:20px;height:20px;border-radius:50%;overflow:hidden;cursor:pointer;border:2px solid transparent;flex-shrink:0;position:relative;}
+.swatch-custom.active{border-color:var(--accent2);}
+.swatch-custom input[type=color]{position:absolute;top:-4px;left:-4px;width:30px;height:30px;border:none;background:none;cursor:pointer;opacity:0;}
+.swatch-custom-preview{width:100%;height:100%;border-radius:50%;}
+
+/* ── CROP EDITOR ── */
+.editor-block{margin-bottom:16px;}
+.editor-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;}
+.crop-outer{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border2);cursor:grab;user-select:none;touch-action:none;background:#000;}
+.crop-outer:active{cursor:grabbing;}
+.crop-canvas{display:block;width:100%;}
+.grid-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.zoom-row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+.zoom-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;font-size:16px;color:var(--text);display:flex;align-items:center;justify-content:center;}
+.zoom-btn:hover{background:var(--bg3);}
+.zoom-track{flex:1;accent-color:var(--accent);}
+.zoom-val{font-size:12px;color:var(--text2);min-width:38px;text-align:right;}
+.editor-hint{font-size:11px;color:var(--text3);margin-top:5px;text-align:center;}
+
+/* ── SLICES ROW ── */
+.slices-row{display:flex;gap:4px;margin-bottom:6px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.slice-wrap{flex:1;overflow:hidden;position:relative;}
+.slice-wrap canvas{width:100%;height:100%;display:block;}
+.slice-num{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:600;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.dims-info{font-size:11px;color:var(--text3);text-align:center;margin-bottom:12px;}
+
+/* ── SORT GRID ── */
+.sort-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
+.sort-item{border-radius:var(--radius);overflow:hidden;border:2px solid transparent;cursor:grab;position:relative;flex-shrink:0;user-select:none;background:#111;transition:border-color .15s,opacity .15s,transform .15s;}
+.sort-item:active{cursor:grabbing;}
+.sort-item.dragging{opacity:.4;transform:scale(.95);}
+.sort-item.drag-over{border-color:var(--accent);transform:scale(1.05);}
+.sort-item.editing{border-color:var(--accent);}
+.sort-item canvas{width:100%;height:100%;display:block;pointer-events:none;}
+.sort-item .num-badge{position:absolute;top:3px;left:3px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:600;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.sort-item .remove-btn{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;}
+.sort-item:hover .remove-btn,.sort-item:active .remove-btn{opacity:1;}
+.sort-hint{font-size:11px;color:var(--text3);margin-bottom:12px;}
+
+/* ── PHONE PREVIEW ── */
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.preview-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);text-align:center;margin-bottom:14px;}
+.phone-wrap{display:flex;justify-content:center;margin-bottom:20px;}
+.phone-frame{width:230px;background:#1a1a1a;border-radius:24px;border:2px solid #333;overflow:hidden;}
+.ig-header{display:flex;align-items:center;gap:7px;padding:9px 11px 5px;border-bottom:1px solid #2a2a2a;}
+.ig-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:600;}
+.ig-uname{font-size:11px;font-weight:500;color:#e0e0e0;}
+.ig-dots{margin-left:auto;font-size:14px;color:#666;}
+.c-viewport{position:relative;width:100%;overflow:hidden;background:#000;}
+.c-track{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;transition:transform .35s cubic-bezier(.4,0,.2,1);}
+.c-slide{min-width:100%;height:100%;overflow:hidden;}
+.c-slide canvas{width:100%;height:100%;display:block;}
+.c-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.85);border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;z-index:2;color:#000;}
+.c-nav.prev{left:5px;}.c-nav.next{right:5px;}
+.c-nav:disabled{opacity:.25;cursor:default;}
+.c-dots-row{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:2;}
+.c-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.35);}
+.c-dot.active{background:#fff;}
+.ig-actions{display:flex;gap:9px;padding:7px 11px 3px;align-items:center;}
+.ig-btn{background:none;border:none;cursor:pointer;color:#e0e0e0;font-size:15px;padding:2px;}
+.ig-bk{margin-left:auto;}
+.ig-likes{font-size:11px;font-weight:500;color:#e0e0e0;padding:0 11px 3px;}
+.ig-cap{font-size:10px;color:#888;padding:0 11px 9px;line-height:1.4;}
+
+/* ── ACTIONS ── */
+.actions-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.btn-sec{font-size:13px;font-weight:500;background:none;border:1px solid var(--border2);border-radius:var(--radius);padding:9px 16px;cursor:pointer;color:var(--text);font-family:'DM Sans',sans-serif;transition:background .12s;}
+.btn-sec:hover{background:var(--bg3);}
+.btn-pri{font-size:13px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:9px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .12s;}
+.btn-pri:hover{background:#3C3489;}
+.tip{font-size:12px;color:var(--text3);text-align:center;margin-top:10px;padding:8px 12px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:16px;text-align:center;}
+footer p{font-size:12px;color:var(--text3);}
+footer a{color:var(--accent2);text-decoration:none;}
+
+/* ── PANEL ANIM ── */
+.panel{display:none;animation:fadeIn .2s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🎞</div>
+      Carrusel AB
+    </div>
+    <div class="header-badge">Beta gratuita</div>
+  </div>
+</header>
+
+<main>
+  <!-- Install Banner -->
+  <div class="install-banner" id="installBanner">
+    <span style="font-size:20px;">📲</span>
+    <p><strong>Instalar app</strong> — agregá Carrusel AB a tu pantalla de inicio para usarla sin internet.</p>
+    <button class="btn-install" id="btnInstall">Instalar</button>
+  </div>
+
+  <!-- Format -->
+  <div class="section-title">Formato de publicación</div>
+  <div class="fmt-grid" id="fmtBtns">
+    <div class="fmt-card" data-fmt="vertical" onclick="setFormat('vertical')">
+      <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:14px;height:20px;"></div></div>
+      <div class="fmt-name">Vertical <span class="fmt-badge">★</span></div>
+      <div class="fmt-dim">4:5 · 1080×1350</div>
+    </div>
+    <div class="fmt-card active" data-fmt="square" onclick="setFormat('square')">
+      <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:18px;height:18px;"></div></div>
+      <div class="fmt-name">Cuadrado</div>
+      <div class="fmt-dim">1:1 · 1080×1080</div>
+    </div>
+    <div class="fmt-card" data-fmt="horizontal" onclick="setFormat('horizontal')">
+      <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:22px;height:12px;"></div></div>
+      <div class="fmt-name">Horizontal</div>
+      <div class="fmt-dim">1.91:1 · 1080×566</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('split')">✂️ Dividir 1 foto</button>
+    <button class="tab" onclick="switchTab('multi')">🖼 Carrusel múltiple</button>
+  </div>
+
+  <!-- SPLIT PANEL -->
+  <div id="panel-split" class="panel active">
+    <div class="upload-zone" id="splitUpload">
+      <div class="upload-icon">✂️</div>
+      <div class="upload-title">Sube una foto para dividir</div>
+      <div class="upload-sub">Arrastrá o tocá para seleccionar · JPG, PNG, WEBP</div>
+    </div>
+    <input type="file" id="splitFile" accept="image/*">
+
+    <div id="splitEditor" class="hidden">
+      <div class="ctrl-bar">
+        <span class="ctrl-label">Dividir en:</span>
+        <div class="split-btns">
+          <button class="split-btn" data-n="2" onclick="setSplits(2)">2</button>
+          <button class="split-btn active" data-n="3" onclick="setSplits(3)">3</button>
+          <button class="split-btn" data-n="4" onclick="setSplits(4)">4</button>
+        </div>
+        <div class="sep"></div>
+        <span class="ctrl-label">Ancla:</span>
+        <div class="anchor-btns">
+          <button class="anchor-btn" data-ax="0" data-ay="0" title="Arriba izquierda" onclick="setAnchor(0,0)"><div class="anchor-dot"><span class="hi"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></button>
+          <button class="anchor-btn" data-ax="0.5" data-ay="0" title="Arriba centro" onclick="setAnchor(0.5,0)"><div class="anchor-dot"><span></span><span class="hi"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></button>
+          <button class="anchor-btn" data-ax="0" data-ay="0.5" title="Centro izq" onclick="setAnchor(0,0.5)"><div class="anchor-dot"><span></span><span></span><span></span><span class="hi"></span><span></span><span></span><span></span><span></span><span></span></div></button>
+          <button class="anchor-btn" data-ax="0.5" data-ay="0.5" title="Centro" onclick="setAnchor(0.5,0.5)"><div class="anchor-dot"><span></span><span></span><span></span><span></span><span class="hi"></span><span></span><span></span><span></span><span></span></div></button>
+          <button class="anchor-btn active" data-ax="0" data-ay="1" title="Abajo izquierda" onclick="setAnchor(0,1)"><div class="anchor-dot"><span></span><span></span><span></span><span></span><span></span><span></span><span class="hi"></span><span></span><span></span></div></button>
+          <button class="anchor-btn" data-ax="0.5" data-ay="1" title="Abajo centro" onclick="setAnchor(0.5,1)"><div class="anchor-dot"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span class="hi"></span><span></span></div></button>
+        </div>
+        <div class="sep"></div>
+        <span class="ctrl-label">Fondo:</span>
+        <div class="color-swatches">
+          <div class="swatch active" style="background:#000;" onclick="setColor(this,'#000000')"></div>
+          <div class="swatch" style="background:#fff;border-color:#444;" onclick="setColor(this,'#ffffff')"></div>
+          <div class="swatch" style="background:#f5f5f0;" onclick="setColor(this,'#f5f5f0')"></div>
+          <div class="swatch" style="background:#1a1a2e;" onclick="setColor(this,'#1a1a2e')"></div>
+          <div class="swatch" style="background:#2d2d2d;" onclick="setColor(this,'#2d2d2d')"></div>
+          <div class="swatch-custom" id="swatchCustom">
+            <div class="swatch-custom-preview" id="swatchPreview" style="background:#e8c4b8;"></div>
+            <input type="color" id="colorPicker" value="#e8c4b8">
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-block">
+        <div class="editor-label">Encuadre — arrastrá · scroll o pellizco para zoom</div>
+        <div class="crop-outer" id="sCropOuter">
+          <canvas id="sCropCanvas"></canvas>
+          <svg class="grid-svg" id="sGridSvg"></svg>
+        </div>
+        <div class="zoom-row">
+          <button class="zoom-btn" id="sZoomOut">−</button>
+          <input type="range" class="zoom-track" id="sZoomSlider" min="10" max="300" step="1" value="100">
+          <button class="zoom-btn" id="sZoomIn">+</button>
+          <span class="zoom-val" id="sZoomVal">100%</span>
+        </div>
+        <div class="editor-hint">Reducí el zoom para ver la foto completa con fondo · el ancla define la posición inicial</div>
+      </div>
+
+      <div class="slices-row" id="sSlicesRow"></div>
+      <div class="dims-info" id="sSliceHint"></div>
+
+      <div class="divider"></div>
+      <div class="preview-title">Vista previa en Instagram</div>
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="ig-header"><div class="ig-avatar">IG</div><span class="ig-uname">tu_usuario</span><span class="ig-dots">···</span></div>
+          <div class="c-viewport" id="sViewport">
+            <div class="c-track" id="sTrack"></div>
+            <button class="c-nav prev" id="sPrev">‹</button>
+            <button class="c-nav next" id="sNext">›</button>
+            <div class="c-dots-row" id="sDots"></div>
+          </div>
+          <div class="ig-actions"><button class="ig-btn">♡</button><button class="ig-btn">💬</button><button class="ig-btn">↗</button><button class="ig-btn ig-bk">🔖</button></div>
+          <div class="ig-likes">1,234 me gusta</div>
+          <div class="ig-cap"><strong>tu_usuario</strong> Tu descripción aquí ✨</div>
+        </div>
+      </div>
+      <div class="actions-row">
+        <button class="btn-sec" onclick="document.getElementById('splitFile').click()">Cambiar foto</button>
+        <button class="btn-pri" id="splitExport">Descargar partes ↓</button>
+      </div>
+      <div class="tip">Las fotos se descargan numeradas en orden — subílas así a Instagram</div>
+    </div>
+  </div>
+
+  <!-- MULTI PANEL -->
+  <div id="panel-multi" class="panel">
+    <div class="upload-zone" id="multiUpload">
+      <div class="upload-icon">🖼</div>
+      <div class="upload-title">Sube varias fotos</div>
+      <div class="upload-sub">Arrastrá o tocá · hasta 10 fotos · JPG, PNG, WEBP</div>
+    </div>
+    <input type="file" id="multiFile" multiple accept="image/*">
+
+    <div id="multiEditor" class="hidden">
+      <div class="editor-label">Orden del carrusel — arrastrá para reordenar · tocá para encuadrar</div>
+      <div class="sort-grid" id="sortGrid"></div>
+      <div class="sort-hint" id="mHint"></div>
+
+      <div id="mCropWrap" class="hidden editor-block">
+        <div class="editor-label" id="mCropLabel">Ajustando foto 1</div>
+        <div class="crop-outer" id="mCropOuter"><canvas id="mCropCanvas"></canvas></div>
+        <div class="zoom-row">
+          <button class="zoom-btn" id="mZoomOut">−</button>
+          <input type="range" class="zoom-track" id="mZoomSlider" min="100" max="300" step="1" value="100">
+          <button class="zoom-btn" id="mZoomIn">+</button>
+          <span class="zoom-val" id="mZoomVal">100%</span>
+        </div>
+        <div class="editor-hint">Arrastrá para reencuadrar · los cambios se ven en la vista previa al instante</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="preview-title">Vista previa en Instagram</div>
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="ig-header"><div class="ig-avatar">IG</div><span class="ig-uname">tu_usuario</span><span class="ig-dots">···</span></div>
+          <div class="c-viewport" id="mViewport">
+            <div class="c-track" id="mTrack"></div>
+            <button class="c-nav prev" id="mPrev">‹</button>
+            <button class="c-nav next" id="mNext">›</button>
+            <div class="c-dots-row" id="mDots"></div>
+          </div>
+          <div class="ig-actions"><button class="ig-btn">♡</button><button class="ig-btn">💬</button><button class="ig-btn">↗</button><button class="ig-btn ig-bk">🔖</button></div>
+          <div class="ig-likes">1,234 me gusta</div>
+          <div class="ig-cap"><strong>tu_usuario</strong> Tu descripción aquí ✨</div>
+        </div>
+      </div>
+      <div class="actions-row">
+        <button class="btn-sec" onclick="document.getElementById('multiFile').click()">+ Agregar más</button>
+        <button class="btn-pri" id="mExport">Descargar en orden ↓</button>
+      </div>
+      <div class="tip">Las fotos se descargan numeradas según el orden definido arriba</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>Carrusel AB · <a href="https://github.com" target="_blank">Ver en GitHub</a> · Hecho con ♡</p>
+</footer>
+</div>
+
+<script>
+// ── PWA INSTALL ──
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('btnInstall').addEventListener('click',()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{
+    deferredPrompt=null;
+    document.getElementById('installBanner').classList.remove('show');
+  });
+});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('installBanner').classList.remove('show');
+});
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
+}
+
+// ── FORMATS ──
+const FORMATS={
+  vertical:{w:1080,h:1350,label:'4:5 · 1080×1350px'},
+  square:{w:1080,h:1080,label:'1:1 · 1080×1080px'},
+  horizontal:{w:1080,h:566,label:'1.91:1 · 1080×566px'}
+};
+let currentFmt='square';
+function getFmt(){return FORMATS[currentFmt];}
+function setFormat(fmt){
+  currentFmt=fmt;
+  document.querySelectorAll('.fmt-card').forEach(b=>b.classList.toggle('active',b.dataset.fmt===fmt));
+  updateViewportAspect();
+  if(sImg)initSplit();
+  if(mImages.length)rerenderAllMulti();
+}
+function updateViewportAspect(){
+  const f=getFmt(),ratio=f.h/f.w;
+  document.querySelectorAll('.c-viewport').forEach(el=>{
+    el.style.paddingBottom=(ratio*100)+'%';
+  });
+}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['split','multi'][i]===t));
+  ['split','multi'].forEach(id=>document.getElementById('panel-'+id).classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+}
+
+function clamp(v,mn,mx){return Math.min(mx,Math.max(mn,v));}
+function clampOffset(ox,oy,imgW,imgH,cropW,cropH,scale){
+  const sw=imgW*scale,sh=imgH*scale;
+  return[clamp(ox,Math.min(0,cropW-sw),Math.max(0,cropW-sw)),clamp(oy,Math.min(0,cropH-sh),Math.max(0,cropH-sh))];
+}
+function anchoredOffset(imgW,imgH,cropW,cropH,scale,ax,ay){
+  const sw=imgW*scale,sh=imgH*scale;
+  const minX=Math.min(0,cropW-sw),maxX=Math.max(0,cropW-sw);
+  const minY=Math.min(0,cropH-sh),maxY=Math.max(0,cropH-sh);
+  return[minX+(maxX-minX)*ax,minY+(maxY-minY)*ay];
+}
+function fitScale(iW,iH,cW,cH){return Math.min(cW/iW,cH/iH);}
+function fillScale(iW,iH,cW,cH){return Math.max(cW/iW,cH/iH);}
+
+function attachPanZoom(outer,canvas,getS,setS,onUpdate){
+  let drag=false,sx=0,sy=0,ox=0,oy=0;
+  function down(cx,cy){drag=true;sx=cx;sy=cy;const s=getS();ox=s.offX;oy=s.offY;}
+  function move(cx,cy){
+    if(!drag)return;
+    const s=getS(),ratio=s.cropW/canvas.offsetWidth;
+    const[nx,ny]=clampOffset(ox+(cx-sx)*ratio,oy+(cy-sy)*ratio,s.imgW,s.imgH,s.cropW,s.cropH,s.scale);
+    setS({offX:nx,offY:ny});onUpdate();
+  }
+  outer.addEventListener('mousedown',e=>{down(e.clientX,e.clientY);e.preventDefault();});
+  window.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+  window.addEventListener('mouseup',()=>{drag=false;});
+  outer.addEventListener('touchstart',e=>{
+    if(e.touches.length===1){down(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();}
+  },{passive:false});
+  window.addEventListener('touchmove',e=>{
+    if(e.touches.length===1){move(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();}
+    else if(e.touches.length===2){
+      const s=getS(),dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(!outer._lp){outer._lp=dist;return;}
+      const delta=(dist-outer._lp)/outer.offsetWidth;outer._lp=dist;
+      const mn=fitScale(s.imgW,s.imgH,s.cropW,s.cropH),mx=fillScale(s.imgW,s.imgH,s.cropW,s.cropH)*3;
+      const ns=clamp(s.scale+delta*s.scale,mn,mx);
+      const[nx,ny]=clampOffset(s.offX,s.offY,s.imgW,s.imgH,s.cropW,s.cropH,ns);
+      setS({scale:ns,offX:nx,offY:ny});onUpdate();e.preventDefault();
+    }
+  },{passive:false});
+  window.addEventListener('touchend',e=>{if(e.touches.length<2)outer._lp=null;drag=false;});
+  outer.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const s=getS(),mn=fitScale(s.imgW,s.imgH,s.cropW,s.cropH),mx=fillScale(s.imgW,s.imgH,s.cropW,s.cropH)*3;
+    const ns=clamp(s.scale-e.deltaY/400*s.scale,mn,mx);
+    const[nx,ny]=clampOffset(s.offX,s.offY,s.imgW,s.imgH,s.cropW,s.cropH,ns);
+    setS({scale:ns,offX:nx,offY:ny});onUpdate();
+  },{passive:false});
+}
+
+// ── COLOR & ANCHOR ──
+let sBgColor='#000000',sAnchorX=0,sAnchorY=1;
+function setColor(el,color){
+  sBgColor=color;
+  document.querySelectorAll('.swatch,.swatch-custom').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');drawSplit();
+}
+function setAnchor(ax,ay){
+  sAnchorX=ax;sAnchorY=ay;
+  document.querySelectorAll('.anchor-btn').forEach(b=>b.classList.toggle('active',parseFloat(b.dataset.ax)===ax&&parseFloat(b.dataset.ay)===ay));
+  if(sImg)initSplit();
+}
+document.getElementById('colorPicker').addEventListener('input',function(){
+  sBgColor=this.value;
+  document.getElementById('swatchPreview').style.background=this.value;
+  document.querySelectorAll('.swatch,.swatch-custom').forEach(s=>s.classList.remove('active'));
+  document.getElementById('swatchCustom').classList.add('active');
+  drawSplit();
+});
+
+// ── SPLIT ──
+let sImg=null,sN=3,sIdx=0;
+let sState={offX:0,offY:0,scale:1,imgW:0,imgH:0,cropW:0,cropH:0};
+const sCropOuter=document.getElementById('sCropOuter');
+const sCropCanvas=document.getElementById('sCropCanvas');
+
+['click'].forEach(ev=>document.getElementById('splitUpload').addEventListener(ev,()=>document.getElementById('splitFile').click()));
+document.getElementById('splitUpload').addEventListener('dragover',e=>{e.preventDefault();document.getElementById('splitUpload').classList.add('dragover');});
+document.getElementById('splitUpload').addEventListener('dragleave',()=>document.getElementById('splitUpload').classList.remove('dragover'));
+document.getElementById('splitUpload').addEventListener('drop',e=>{e.preventDefault();document.getElementById('splitUpload').classList.remove('dragover');if(e.dataTransfer.files[0])loadSImg(e.dataTransfer.files[0]);});
+document.getElementById('splitFile').addEventListener('change',e=>{if(e.target.files[0])loadSImg(e.target.files[0]);});
+
+function loadSImg(file){
+  const r=new FileReader();
+  r.onload=ev=>{const img=new Image();img.onload=()=>{sImg=img;initSplit();document.getElementById('splitEditor').classList.remove('hidden');};img.src=ev.target.result;};
+  r.readAsDataURL(file);
+}
+function initSplit(){
+  const f=getFmt(),cropW=sN*f.w,cropH=f.h;
+  const fill=fillScale(sImg.width,sImg.height,cropW,cropH);
+  const[ox,oy]=anchoredOffset(sImg.width,sImg.height,cropW,cropH,fill,sAnchorX,sAnchorY);
+  sState={offX:ox,offY:oy,scale:fill,imgW:sImg.width,imgH:sImg.height,cropW,cropH};
+  sCropCanvas.width=cropW;sCropCanvas.height=cropH;
+  const dispW=Math.min(sCropOuter.parentElement.offsetWidth||360,cropW);
+  const dispH=Math.round(dispW*(cropH/cropW));
+  sCropOuter.style.width=dispW+'px';sCropOuter.style.height=dispH+'px';
+  document.getElementById('sZoomSlider').value=100;
+  document.getElementById('sZoomVal').textContent='100%';
+  drawSplit();
+  attachPanZoom(sCropOuter,sCropCanvas,()=>sState,(p)=>{Object.assign(sState,p);syncSZoom();},drawSplit);
+}
+function syncSZoom(){
+  const fill=fillScale(sState.imgW,sState.imgH,sState.cropW,sState.cropH);
+  const mn=fitScale(sState.imgW,sState.imgH,sState.cropW,sState.cropH);
+  document.getElementById('sZoomSlider').value=clamp(Math.round(10+((sState.scale-mn)/(fill*3-mn))*290),10,300);
+  document.getElementById('sZoomVal').textContent=Math.round((sState.scale/fill)*100)+'%';
+}
+document.getElementById('sZoomSlider').addEventListener('input',function(){
+  if(!sImg)return;
+  const fill=fillScale(sState.imgW,sState.imgH,sState.cropW,sState.cropH);
+  const mn=fitScale(sState.imgW,sState.imgH,sState.cropW,sState.cropH);
+  const t=(parseInt(this.value)-10)/290;
+  const ns=mn+t*(fill*3-mn);
+  const[nx,ny]=clampOffset(sState.offX,sState.offY,sState.imgW,sState.imgH,sState.cropW,sState.cropH,ns);
+  sState.scale=ns;sState.offX=nx;sState.offY=ny;
+  document.getElementById('sZoomVal').textContent=Math.round((ns/fill)*100)+'%';
+  drawSplit();
+});
+document.getElementById('sZoomOut').addEventListener('click',()=>{const sl=document.getElementById('sZoomSlider');sl.value=clamp(parseInt(sl.value)-8,10,300);sl.dispatchEvent(new Event('input'));});
+document.getElementById('sZoomIn').addEventListener('click',()=>{const sl=document.getElementById('sZoomSlider');sl.value=clamp(parseInt(sl.value)+8,10,300);sl.dispatchEvent(new Event('input'));});
+
+function drawSplit(){
+  if(!sImg)return;
+  const{offX,offY,scale,imgW,imgH,cropW,cropH}=sState;
+  const ctx=sCropCanvas.getContext('2d');
+  ctx.clearRect(0,0,cropW,cropH);ctx.fillStyle=sBgColor;ctx.fillRect(0,0,cropW,cropH);
+  ctx.drawImage(sImg,offX,offY,imgW*scale,imgH*scale);
+  const svg=document.getElementById('sGridSvg');svg.innerHTML='';
+  for(let i=1;i<sN;i++){
+    const x=(i/sN)*100;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x+'%');line.setAttribute('y1','0');line.setAttribute('x2',x+'%');line.setAttribute('y2','100%');
+    line.setAttribute('stroke','rgba(255,255,255,0.6)');line.setAttribute('stroke-width','1.5');line.setAttribute('stroke-dasharray','5,4');
+    svg.appendChild(line);
+  }
+  renderSSlices();renderSCarousel();updateSNav();
+  const f=getFmt();
+  document.getElementById('sSliceHint').textContent=`${sN} partes · ${f.w}×${f.h}px cada una`;
+  updateViewportAspect();
+}
+function sliceCanvas(src,i,sw,sh){
+  const c=document.createElement('canvas');c.width=sw;c.height=sh;
+  c.getContext('2d').drawImage(src,i*sw,0,sw,sh,0,0,sw,sh);return c;
+}
+function renderSSlices(){
+  const row=document.getElementById('sSlicesRow');row.innerHTML='';
+  const f=getFmt();const ar=f.h/f.w;
+  for(let i=0;i<sN;i++){
+    const wrap=document.createElement('div');wrap.className='slice-wrap';
+    wrap.style.cssText=`padding-bottom:${ar*(100/sN)}%;position:relative;flex:1;`;
+    const c=sliceCanvas(sCropCanvas,i,f.w,f.h);
+    c.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;';
+    wrap.appendChild(c);
+    const b=document.createElement('div');b.className='slice-num';b.textContent=i+1;wrap.appendChild(b);
+    row.appendChild(wrap);
+  }
+}
+function renderSCarousel(){
+  const track=document.getElementById('sTrack'),dots=document.getElementById('sDots');
+  track.innerHTML='';dots.innerHTML='';
+  const f=getFmt();
+  for(let i=0;i<sN;i++){
+    const slide=document.createElement('div');slide.className='c-slide';
+    slide.appendChild(sliceCanvas(sCropCanvas,i,f.w,f.h));
+    track.appendChild(slide);
+    const d=document.createElement('div');d.className='c-dot'+(i===sIdx?' active':'');dots.appendChild(d);
+  }
+  track.style.transform=`translateX(-${sIdx*100}%)`;
+}
+function updateSNav(){
+  document.getElementById('sPrev').disabled=sIdx===0;document.getElementById('sNext').disabled=sIdx===sN-1;
+  document.getElementById('sPrev').style.display=sN>1?'flex':'none';document.getElementById('sNext').style.display=sN>1?'flex':'none';
+}
+function setSplits(n){
+  sN=n;document.querySelectorAll('.split-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.n)===n));
+  sIdx=0;if(sImg)initSplit();
+}
+document.getElementById('sPrev').addEventListener('click',()=>{if(sIdx>0){sIdx--;renderSCarousel();updateSNav();}});
+document.getElementById('sNext').addEventListener('click',()=>{if(sIdx<sN-1){sIdx++;renderSCarousel();updateSNav();}});
+document.getElementById('splitExport').addEventListener('click',()=>{
+  const f=getFmt();
+  for(let i=0;i<sN;i++){
+    const c=sliceCanvas(sCropCanvas,i,f.w,f.h);
+    setTimeout(()=>{const a=document.createElement('a');a.href=c.toDataURL('image/jpeg',.95);a.download=`carrusel_${String(i+1).padStart(2,'0')}.jpg`;a.click();},i*200);
+  }
+});
+
+// ── MULTI ──
+let mImages=[],mIdx=0,dragSrc=null,mEditIdx=null,mPanAttached=false;
+const mCropOuter=document.getElementById('mCropOuter');
+const mCropCanvas=document.getElementById('mCropCanvas');
+
+document.getElementById('multiUpload').addEventListener('click',()=>document.getElementById('multiFile').click());
+document.getElementById('multiUpload').addEventListener('dragover',e=>{e.preventDefault();document.getElementById('multiUpload').classList.add('dragover');});
+document.getElementById('multiUpload').addEventListener('dragleave',()=>document.getElementById('multiUpload').classList.remove('dragover'));
+document.getElementById('multiUpload').addEventListener('drop',e=>{e.preventDefault();document.getElementById('multiUpload').classList.remove('dragover');handleMulti(e.dataTransfer.files);});
+document.getElementById('multiFile').addEventListener('change',e=>handleMulti(e.target.files));
+
+function getCropDims(){const f=getFmt();return{cropW:f.w,cropH:f.h};}
+function handleMulti(files){
+  const arr=Array.from(files).filter(f=>f.type.startsWith('image/'));
+  const toAdd=arr.slice(0,10-mImages.length);let loaded=0;if(!toAdd.length)return;
+  toAdd.forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      const img=new Image();
+      img.onload=()=>{
+        const{cropW,cropH}=getCropDims();
+        const sc=fillScale(img.width,img.height,cropW,cropH);
+        const[ox,oy]=anchoredOffset(img.width,img.height,cropW,cropH,sc,0,1);
+        mImages.push({img,offX:ox,offY:oy,scale:sc,imgW:img.width,imgH:img.height,cropW,cropH});
+        loaded++;if(loaded===toAdd.length)renderMulti();
+      };img.src=ev.target.result;
+    };r.readAsDataURL(file);
+  });
+}
+function rerenderAllMulti(){
+  mImages.forEach(item=>{
+    const{cropW,cropH}=getCropDims();
+    const sc=fillScale(item.imgW,item.imgH,cropW,cropH);
+    const[ox,oy]=anchoredOffset(item.imgW,item.imgH,cropW,cropH,sc,0,1);
+    Object.assign(item,{offX:ox,offY:oy,scale:sc,cropW,cropH});
+  });
+  renderMulti();if(mEditIdx!==null)openMCrop(mEditIdx);
+}
+function renderMulti(){
+  document.getElementById('multiEditor').classList.remove('hidden');
+  renderSortGrid();renderMCarousel();renderMDots();updateMNav();updateViewportAspect();
+  document.getElementById('mHint').textContent=mImages.length>1?`${mImages.length} fotos · arrastrá para reordenar · tocá para encuadrar`:'1 foto · tocá la miniatura para encuadrar';
+}
+function thumbCanvas(item){
+  const c=document.createElement('canvas');c.width=item.cropW;c.height=item.cropH;
+  const ctx=c.getContext('2d');ctx.fillStyle='#111';ctx.fillRect(0,0,item.cropW,item.cropH);
+  ctx.drawImage(item.img,item.offX,item.offY,item.imgW*item.scale,item.imgH*item.scale);return c;
+}
+function thumbSize(){const f=getFmt();const h=72;return{w:Math.round(h*(f.w/f.h)),h};}
+function renderSortGrid(){
+  const grid=document.getElementById('sortGrid');grid.innerHTML='';
+  const{w,h}=thumbSize();
+  mImages.forEach((item,i)=>{
+    const el=document.createElement('div');el.className='sort-item'+(i===mEditIdx?' editing':'');el.draggable=true;
+    el.style.width=w+'px';el.style.height=h+'px';
+    const tc=thumbCanvas(item);tc.style.cssText='width:100%;height:100%;display:block;pointer-events:none;';
+    el.appendChild(tc);
+    const badge=document.createElement('div');badge.className='num-badge';badge.textContent=i+1;el.appendChild(badge);
+    const rb=document.createElement('button');rb.className='remove-btn';rb.textContent='✕';el.appendChild(rb);
+    el.addEventListener('dragstart',e=>{dragSrc=i;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    el.addEventListener('dragend',()=>{el.classList.remove('dragging');document.querySelectorAll('.sort-item').forEach(x=>x.classList.remove('drag-over'));});
+    el.addEventListener('dragover',e=>{e.preventDefault();document.querySelectorAll('.sort-item').forEach(x=>x.classList.remove('drag-over'));el.classList.add('drag-over');});
+    el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
+    el.addEventListener('drop',e=>{
+      e.preventDefault();el.classList.remove('drag-over');
+      if(dragSrc===null||dragSrc===i)return;
+      const moved=mImages.splice(dragSrc,1)[0];mImages.splice(i,0,moved);
+      if(mEditIdx===dragSrc)mEditIdx=i;dragSrc=null;renderMulti();if(mEditIdx!==null)openMCrop(mEditIdx);
+    });
+    rb.addEventListener('click',e=>{
+      e.stopPropagation();mImages.splice(i,1);
+      if(mIdx>=mImages.length)mIdx=Math.max(0,mImages.length-1);
+      if(mEditIdx===i){mEditIdx=null;document.getElementById('mCropWrap').classList.add('hidden');}
+      else if(mEditIdx!==null&&i<mEditIdx)mEditIdx--;
+      if(!mImages.length){document.getElementById('multiEditor').classList.add('hidden');return;}
+      renderMulti();
+    });
+    el.addEventListener('click',e=>{
+      if(e.target===rb)return;
+      if(mEditIdx===i){mEditIdx=null;document.getElementById('mCropWrap').classList.add('hidden');renderSortGrid();return;}
+      openMCrop(i);
+    });
+    grid.appendChild(el);
+  });
+}
+function openMCrop(i){
+  mEditIdx=i;const item=mImages[i];
+  document.getElementById('mCropLabel').textContent=`Encuadrando foto ${i+1} — arrastrá · scroll para zoom`;
+  mCropCanvas.width=item.cropW;mCropCanvas.height=item.cropH;
+  const dispW=Math.min(mCropOuter.parentElement.offsetWidth||360,item.cropW);
+  mCropOuter.style.width=dispW+'px';mCropOuter.style.height=Math.round(dispW*(item.cropH/item.cropW))+'px';
+  document.getElementById('mCropWrap').classList.remove('hidden');
+  const fill=fillScale(item.imgW,item.imgH,item.cropW,item.cropH);
+  document.getElementById('mZoomSlider').value=Math.round((item.scale/fill)*100);
+  document.getElementById('mZoomVal').textContent=document.getElementById('mZoomSlider').value+'%';
+  if(!mPanAttached){
+    attachPanZoom(mCropOuter,mCropCanvas,
+      ()=>{const it=mImages[mEditIdx];return{offX:it.offX,offY:it.offY,scale:it.scale,imgW:it.imgW,imgH:it.imgH,cropW:it.cropW,cropH:it.cropH};},
+      (p)=>{Object.assign(mImages[mEditIdx],p);syncMZoom();},
+      ()=>{drawMCrop();renderMulti();}
+    );mPanAttached=true;
+  }
+  drawMCrop();renderSortGrid();
+}
+function syncMZoom(){
+  if(mEditIdx===null)return;
+  const item=mImages[mEditIdx];
+  const fill=fillScale(item.imgW,item.imgH,item.cropW,item.cropH);
+  document.getElementById('mZoomSlider').value=clamp(Math.round((item.scale/fill)*100),100,300);
+  document.getElementById('mZoomVal').textContent=document.getElementById('mZoomSlider').value+'%';
+}
+document.getElementById('mZoomSlider').addEventListener('input',function(){
+  if(mEditIdx===null)return;
+  const item=mImages[mEditIdx];
+  const fill=fillScale(item.imgW,item.imgH,item.cropW,item.cropH);
+  const ns=fill*(parseInt(this.value)/100);
+  const[nx,ny]=clampOffset(item.offX,item.offY,item.imgW,item.imgH,item.cropW,item.cropH,ns);
+  item.scale=ns;item.offX=nx;item.offY=ny;
+  document.getElementById('mZoomVal').textContent=this.value+'%';drawMCrop();renderMulti();
+});
+document.getElementById('mZoomOut').addEventListener('click',()=>{const sl=document.getElementById('mZoomSlider');sl.value=clamp(parseInt(sl.value)-10,100,300);sl.dispatchEvent(new Event('input'));});
+document.getElementById('mZoomIn').addEventListener('click',()=>{const sl=document.getElementById('mZoomSlider');sl.value=clamp(parseInt(sl.value)+10,100,300);sl.dispatchEvent(new Event('input'));});
+function drawMCrop(){
+  if(mEditIdx===null)return;
+  const item=mImages[mEditIdx];const ctx=mCropCanvas.getContext('2d');
+  ctx.clearRect(0,0,item.cropW,item.cropH);ctx.fillStyle='#111';ctx.fillRect(0,0,item.cropW,item.cropH);
+  ctx.drawImage(item.img,item.offX,item.offY,item.imgW*item.scale,item.imgH*item.scale);
+}
+function renderMCarousel(){
+  const track=document.getElementById('mTrack'),dots=document.getElementById('mDots');
+  track.innerHTML='';dots.innerHTML='';
+  mImages.forEach((item,i)=>{
+    const slide=document.createElement('div');slide.className='c-slide';
+    slide.appendChild(thumbCanvas(item));track.appendChild(slide);
+    const d=document.createElement('div');d.className='c-dot'+(i===mIdx?' active':'');dots.appendChild(d);
+  });
+  track.style.transform=`translateX(-${mIdx*100}%)`;
+}
+function renderMDots(){
+  const dots=document.getElementById('mDots');dots.innerHTML='';
+  mImages.forEach((_,i)=>{const d=document.createElement('div');d.className='c-dot'+(i===mIdx?' active':'');dots.appendChild(d);});
+}
+function updateMNav(){
+  document.getElementById('mPrev').disabled=mIdx===0;document.getElementById('mNext').disabled=mIdx===mImages.length-1;
+  document.getElementById('mPrev').style.display=mImages.length>1?'flex':'none';document.getElementById('mNext').style.display=mImages.length>1?'flex':'none';
+}
+document.getElementById('mPrev').addEventListener('click',()=>{if(mIdx>0){mIdx--;document.getElementById('mTrack').style.transform=`translateX(-${mIdx*100}%)`;renderMDots();updateMNav();}});
+document.getElementById('mNext').addEventListener('click',()=>{if(mIdx<mImages.length-1){mIdx++;document.getElementById('mTrack').style.transform=`translateX(-${mIdx*100}%)`;renderMDots();updateMNav();}});
+document.getElementById('mExport').addEventListener('click',()=>{
+  mImages.forEach((item,i)=>{
+    const c=thumbCanvas(item);
+    setTimeout(()=>{const a=document.createElement('a');a.href=c.toDataURL('image/jpeg',.95);a.download=`carrusel_${String(i+1).padStart(2,'0')}.jpg`;a.click();},i*200);
+  });
+});
+
+updateViewportAspect();
+</script>
+</body>
+</html>
