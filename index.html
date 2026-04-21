@@ -385,7 +385,7 @@ footer a{color:var(--accent2);text-decoration:none;}
 
 <footer>
   <p>Carrusel AB · <a href="https://github.com" target="_blank">Ver en GitHub</a> · Hecho con ♡</p>
-  <p style="margin-top:4px;font-size:11px;color:#333;">v0.9 · <span id="vdate"></span></p>
+  <p style="margin-top:4px;font-size:11px;color:#333;">v1.0 · <span id="vdate"></span></p>
 </footer>
 </div>
 
@@ -732,8 +732,25 @@ function setSplits(n){
   sN=n;document.querySelectorAll('.split-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.n)===n));
   sIdx=0;if(sImg)initSplit();
 }
-document.getElementById('sPrev').addEventListener('click',()=>{if(sIdx>0){sIdx--;renderSCarousel();updateSNav();}});
-document.getElementById('sNext').addEventListener('click',()=>{if(sIdx<sN-1){sIdx++;renderSCarousel();updateSNav();}});
+document.getElementById('sPrev').addEventListener('click',()=>{if(sIdx>0){sIdx--;renderSCarousel();updateSNav();highlightSlice();}});
+document.getElementById('sNext').addEventListener('click',()=>{if(sIdx<sN-1){sIdx++;renderSCarousel();updateSNav();highlightSlice();}});
+function highlightSlice(){
+  const svg=document.getElementById('sGridSvg');
+  const old=svg.querySelector('.slice-highlight');
+  if(old)old.remove();
+  if(!sImg)return;
+  const pct=100/sN;
+  const x=sIdx*pct;
+  const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  rect.setAttribute('x',x+'%');rect.setAttribute('y','0');
+  rect.setAttribute('width',pct+'%');rect.setAttribute('height','100%');
+  rect.setAttribute('fill','rgba(83,74,183,0.18)');
+  rect.setAttribute('class','slice-highlight');
+  rect.style.pointerEvents='none';
+  svg.insertBefore(rect,svg.firstChild);
+  // Also scroll editor into view on mobile
+  document.getElementById('sCropOuter').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function canvasToBlob(canvas){
   return new Promise(res=>canvas.toBlob(b=>res(b),'image/jpeg',0.95));
 }
@@ -909,8 +926,17 @@ function updateMNav(){
   document.getElementById('mPrev').disabled=mIdx===0;document.getElementById('mNext').disabled=mIdx===mImages.length-1;
   document.getElementById('mPrev').style.display=mImages.length>1?'flex':'none';document.getElementById('mNext').style.display=mImages.length>1?'flex':'none';
 }
-document.getElementById('mPrev').addEventListener('click',()=>{if(mIdx>0){mIdx--;document.getElementById('mTrack').style.transform=`translateX(-${mIdx*100}%)`;renderMDots();updateMNav();}});
-document.getElementById('mNext').addEventListener('click',()=>{if(mIdx<mImages.length-1){mIdx++;document.getElementById('mTrack').style.transform=`translateX(-${mIdx*100}%)`;renderMDots();updateMNav();}});
+document.getElementById('mPrev').addEventListener('click',()=>{
+  if(mIdx>0){mIdx--;document.getElementById('mTrack').style.transform=`translateX(-${mIdx*100}%)`;renderMDots();updateMNav();syncMultiEditor();}
+});
+document.getElementById('mNext').addEventListener('click',()=>{
+  if(mIdx<mImages.length-1){mIdx++;document.getElementById('mTrack').style.transform=`translateX(-${mIdx*100}%)`;renderMDots();updateMNav();syncMultiEditor();}
+});
+function syncMultiEditor(){
+  if(!mImages.length)return;
+  openMCrop(mIdx);
+  document.getElementById('mCropOuter').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 document.getElementById('mExport').addEventListener('click',()=>{
   mImages.forEach((item,i)=>{
     const c=thumbCanvas(item);
