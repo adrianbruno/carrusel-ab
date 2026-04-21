@@ -78,6 +78,13 @@ main{flex:1;padding:20px 16px 40px;max-width:640px;margin:0 auto;width:100%;}
 .upload-sub{font-size:12px;color:var(--text2);}
 input[type=file]{display:none;}
 .hidden{display:none!important;}
+#topControls{overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s;max-height:400px;opacity:1;}
+#topControls.collapsed{max-height:0;opacity:0;margin:0;pointer-events:none;}
+#collapseBar{margin-bottom:12px;}
+#collapseBtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2);transition:background .15s;}
+#collapseBtn:hover{background:var(--bg3);}
+#collapseBtnIcon{font-size:10px;transition:transform .3s;}
+#topControls.collapsed ~ #collapseBar #collapseBtnIcon{transform:rotate(180deg);}
 
 /* ── CONTROL BAR ── */
 .ctrl-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);flex-wrap:wrap;row-gap:8px;}
@@ -165,6 +172,8 @@ input[type=file]{display:none;}
 .btn-sec:hover{background:var(--bg3);}
 .btn-pri{font-size:13px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:9px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .12s;}
 .btn-pri:hover{background:#3C3489;}
+.btn-share{font-size:13px;font-weight:600;background:#1D9E75;color:#fff;border:none;border-radius:var(--radius);padding:9px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .12s;}
+.btn-share:hover{background:#0F6E56;}
 .tip{font-size:12px;color:var(--text3);text-align:center;margin-top:10px;padding:8px 12px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border);}
 
 /* ── FOOTER ── */
@@ -200,7 +209,8 @@ footer a{color:var(--accent2);text-decoration:none;}
     <button class="btn-install" id="btnInstall">Instalar</button>
   </div>
 
-  <!-- Format -->
+  <!-- Top controls — colapsable -->
+  <div id="topControls">
   <div class="section-title">Formato de publicación</div>
   <div class="fmt-grid" id="fmtBtns">
     <div class="fmt-card" data-fmt="vertical" onclick="setFormat('vertical')">
@@ -224,6 +234,16 @@ footer a{color:var(--accent2);text-decoration:none;}
   <div class="tabs">
     <button class="tab active" onclick="switchTab('split')">✂️ Dividir 1 foto</button>
     <button class="tab" onclick="switchTab('multi')">🖼 Carrusel múltiple</button>
+  </div>
+
+  </div><!-- /topControls -->
+
+  <!-- Collapse bar — visible when editing -->
+  <div id="collapseBar" class="hidden">
+    <button id="collapseBtn" onclick="toggleTopControls()">
+      <span id="collapseBtnIcon">▲</span>
+      <span id="collapseBtnLabel">Formato · Cuadrado · Dividir 1 foto</span>
+    </button>
   </div>
 
   <!-- SPLIT PANEL -->
@@ -304,9 +324,10 @@ footer a{color:var(--accent2);text-decoration:none;}
       </div>
       <div class="actions-row">
         <button class="btn-sec" onclick="document.getElementById('splitFile').click()">Cambiar foto</button>
-        <button class="btn-pri" id="splitExport">Descargar partes ↓</button>
+        <button class="btn-pri" id="splitExport">Descargar ↓</button>
+        <button class="btn-share hidden" id="splitShare">Compartir ↗</button>
       </div>
-      <div class="tip">Las fotos se descargan numeradas en orden — subílas así a Instagram</div>
+      <div class="tip" id="splitTip">Las fotos se descargan numeradas en orden — subílas así a Instagram</div>
     </div>
   </div>
 
@@ -354,16 +375,17 @@ footer a{color:var(--accent2);text-decoration:none;}
       </div>
       <div class="actions-row">
         <button class="btn-sec" onclick="document.getElementById('multiFile').click()">+ Agregar más</button>
-        <button class="btn-pri" id="mExport">Descargar en orden ↓</button>
+        <button class="btn-pri" id="mExport">Descargar ↓</button>
+        <button class="btn-share hidden" id="mShare">Compartir ↗</button>
       </div>
-      <div class="tip">Las fotos se descargan numeradas según el orden definido arriba</div>
+      <div class="tip" id="mTip">Las fotos se descargan numeradas según el orden definido arriba</div>
     </div>
   </div>
 </main>
 
 <footer>
   <p>Carrusel AB · <a href="https://github.com" target="_blank">Ver en GitHub</a> · Hecho con ♡</p>
-  <p style="margin-top:4px;font-size:11px;color:#333;">v0.7 · <span id="vdate"></span></p>
+  <p style="margin-top:4px;font-size:11px;color:#333;">v0.9 · <span id="vdate"></span></p>
 </footer>
 </div>
 
@@ -399,8 +421,9 @@ let currentFmt='square';
 function getFmt(){return FORMATS[currentFmt];}
 function setFormat(fmt){
   currentFmt=fmt;
-  document.querySelectorAll('.fmt-card').forEach(b=>b.classList.toggle('active',b.dataset.fmt===fmt));
+  document.querySelectorAll('.fmt-card').forEach(b=>b.classList.toggle('active',b.dataset.fmt===fmt));updateCollapseLabel();
   updateViewportAspect();
+
   if(sImg)initSplit();
   if(mImages.length)rerenderAllMulti();
 }
@@ -411,8 +434,34 @@ function updateViewportAspect(){
   });
 }
 
+function toggleTopControls(forceCollapse){
+  const tc=document.getElementById('topControls');
+  const bar=document.getElementById('collapseBar');
+  const icon=document.getElementById('collapseBtnIcon');
+  const isCollapsed=tc.classList.contains('collapsed');
+  if(forceCollapse===true&&!isCollapsed||forceCollapse===false&&isCollapsed) return;
+  if(forceCollapse===true||isCollapsed){
+    tc.classList.remove('collapsed');
+    icon.style.transform='rotate(0deg)';
+  } else {
+    tc.classList.add('collapsed');
+    icon.style.transform='rotate(180deg)';
+  }
+}
+function collapseTop(){
+  const tc=document.getElementById('topControls');
+  const bar=document.getElementById('collapseBar');
+  tc.classList.add('collapsed');
+  bar.classList.remove('hidden');
+  updateCollapseLabel();
+}
+function updateCollapseLabel(){
+  const fmtNames={vertical:'Vertical 4:5',square:'Cuadrado 1:1',horizontal:'Horizontal'};
+  const tabName=document.querySelector('.tab.active')?.textContent?.trim()||'';
+  document.getElementById('collapseBtnLabel').textContent=fmtNames[currentFmt]+' · '+tabName;
+}
 function switchTab(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['split','multi'][i]===t));
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['split','multi'][i]===t));updateCollapseLabel();
   ['split','multi'].forEach(id=>document.getElementById('panel-'+id).classList.remove('active'));
   document.getElementById('panel-'+t).classList.add('active');
 }
@@ -589,7 +638,7 @@ function resizeViaFileReader(file,cb){
 
 function loadSImg(file){
   resizeImage(file,img=>{
-    sImg=img;initSplit();document.getElementById('splitEditor').classList.remove('hidden');
+    sImg=img;initSplit();document.getElementById('splitEditor').classList.remove('hidden');collapseTop();
   });
 }
 function initSplit(){
@@ -644,6 +693,7 @@ function drawSplit(){
   const f=getFmt();
   document.getElementById('sSliceHint').textContent=`${sN} partes · ${f.w}×${f.h}px cada una`;
   updateViewportAspect();
+
 }
 function sliceCanvas(src,i,sw,sh){
   const c=document.createElement('canvas');c.width=sw;c.height=sh;
@@ -684,12 +734,36 @@ function setSplits(n){
 }
 document.getElementById('sPrev').addEventListener('click',()=>{if(sIdx>0){sIdx--;renderSCarousel();updateSNav();}});
 document.getElementById('sNext').addEventListener('click',()=>{if(sIdx<sN-1){sIdx++;renderSCarousel();updateSNav();}});
+function canvasToBlob(canvas){
+  return new Promise(res=>canvas.toBlob(b=>res(b),'image/jpeg',0.95));
+}
+async function shareFiles(canvases,prefix){
+  showToast('Preparando archivos...',true);
+  try{
+    const files=await Promise.all(canvases.map(async(c,i)=>{
+      const blob=await canvasToBlob(c);
+      return new File([blob],`${prefix}_${String(i+1).padStart(2,'0')}.jpg`,{type:'image/jpeg'});
+    }));
+    showToast('');
+    await navigator.share({files,title:'Carrusel AB',text:'Creado con Carrusel AB'});
+  }catch(e){
+    showToast('');
+    if(e.name!=='AbortError')showToast('No se pudo compartir');
+  }
+}
+function getSplitCanvases(){
+  const f=getFmt();
+  return Array.from({length:sN},(_,i)=>sliceCanvas(sCropCanvas,i,f.w,f.h));
+}
 document.getElementById('splitExport').addEventListener('click',()=>{
   const f=getFmt();
   for(let i=0;i<sN;i++){
     const c=sliceCanvas(sCropCanvas,i,f.w,f.h);
     setTimeout(()=>{const a=document.createElement('a');a.href=c.toDataURL('image/jpeg',.95);a.download=`carrusel_${String(i+1).padStart(2,'0')}.jpg`;a.click();},i*200);
   }
+});
+document.getElementById('splitShare').addEventListener('click',()=>{
+  shareFiles(getSplitCanvases(),'carrusel');
 });
 
 // ── MULTI ──
@@ -713,7 +787,7 @@ function handleMulti(files){
       const sc=fillScale(img.width,img.height,cropW,cropH);
       const[ox,oy]=anchoredOffset(img.width,img.height,cropW,cropH,sc,0,1);
       mImages.push({img,offX:ox,offY:oy,scale:sc,imgW:img.width,imgH:img.height,cropW,cropH});
-      loaded++;if(loaded===toAdd.length)renderMulti();
+      loaded++;if(loaded===toAdd.length){renderMulti();collapseTop();}
     });
   });
 }
@@ -729,6 +803,7 @@ function rerenderAllMulti(){
 function renderMulti(){
   document.getElementById('multiEditor').classList.remove('hidden');
   renderSortGrid();renderMCarousel();renderMDots();updateMNav();updateViewportAspect();
+
   document.getElementById('mHint').textContent=mImages.length>1?`${mImages.length} fotos · arrastrá para reordenar · tocá para encuadrar`:'1 foto · tocá la miniatura para encuadrar';
 }
 function thumbCanvas(item){
@@ -842,8 +917,16 @@ document.getElementById('mExport').addEventListener('click',()=>{
     setTimeout(()=>{const a=document.createElement('a');a.href=c.toDataURL('image/jpeg',.95);a.download=`carrusel_${String(i+1).padStart(2,'0')}.jpg`;a.click();},i*200);
   });
 });
+document.getElementById('mShare').addEventListener('click',()=>{
+  shareFiles(mImages.map(item=>thumbCanvas(item)),'carrusel');
+});
 
 updateViewportAspect();
+if(navigator.share&&navigator.canShare){
+  ['splitShare','mShare'].forEach(id=>document.getElementById(id).classList.remove('hidden'));
+  document.getElementById('splitTip').textContent='Compartí directo a Instagram o descargá las fotos numeradas';
+  document.getElementById('mTip').textContent='Compartí directo a Instagram o descargá las fotos numeradas';
+}
 document.getElementById('vdate').textContent=new Date('2025-04-21').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
 </script>
 </body>
