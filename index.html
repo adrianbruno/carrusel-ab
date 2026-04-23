@@ -272,21 +272,31 @@ input[type=file]{display:none;}
 
         <!-- Formato -->
         <div class="section-label purple">📐 Formato</div>
-        <div class="fmt-grid" id="fmtBtns">
+        <div class="fmt-grid" id="fmtBtns" style="grid-template-columns:repeat(5,1fr);gap:6px;">
           <div class="fmt-card" data-fmt="vertical" onclick="setFormat('vertical')">
-            <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:13px;height:18px;"></div></div>
-            <div class="fmt-name">Vertical <span class="fmt-badge">★</span></div>
-            <div class="fmt-dim">4:5 · 1080×1350</div>
+            <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:10px;height:14px;"></div></div>
+            <div class="fmt-name" style="font-size:10px;">Vertical <span class="fmt-badge">★</span></div>
+            <div class="fmt-dim">4:5</div>
           </div>
           <div class="fmt-card active" data-fmt="square" onclick="setFormat('square')">
-            <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:17px;height:17px;"></div></div>
-            <div class="fmt-name">Cuadrado</div>
-            <div class="fmt-dim">1:1 · 1080×1080</div>
+            <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:13px;height:13px;"></div></div>
+            <div class="fmt-name" style="font-size:10px;">Cuadrado</div>
+            <div class="fmt-dim">1:1</div>
           </div>
           <div class="fmt-card" data-fmt="horizontal" onclick="setFormat('horizontal')">
-            <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:20px;height:11px;"></div></div>
-            <div class="fmt-name">Horizontal</div>
+            <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:16px;height:9px;"></div></div>
+            <div class="fmt-name" style="font-size:10px;">Horizontal</div>
             <div class="fmt-dim">1.91:1</div>
+          </div>
+          <div class="fmt-card" data-fmt="post" onclick="setFormat('post')">
+            <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:10px;height:14px;"></div></div>
+            <div class="fmt-name" style="font-size:10px;">Post</div>
+            <div class="fmt-dim">3:4</div>
+          </div>
+          <div class="fmt-card" data-fmt="stories" onclick="setFormat('stories')">
+            <div class="fmt-icon-wrap"><div class="fmt-rect" style="width:8px;height:15px;"></div></div>
+            <div class="fmt-name" style="font-size:10px;">Stories</div>
+            <div class="fmt-dim">9:16</div>
           </div>
         </div>
 
@@ -301,7 +311,7 @@ input[type=file]{display:none;}
               <button class="split-btn" data-n="4" onclick="setSplits(4)">4</button>
             </div>
           </div>
-          <div class="upload-zone" id="splitUpload">
+          <div class="upload-zone small" id="splitUpload">
             <div class="upload-icon">🖼️</div>
             <div class="upload-title" id="splitUploadTitle">Tocá para elegir una foto</div>
             <div class="upload-sub">JPG, PNG o HEIC directo de tu cámara</div>
@@ -444,7 +454,7 @@ input[type=file]{display:none;}
         </div>
         <div class="tip" id="previewTip">Las fotos se descargan numeradas en orden — subílas así a Instagram 🚀</div>
         <button class="restart-btn" onclick="restartApp()">← Hacer otro carrusel</button>
-        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-weight:600;">v1.8 · <a href="https://instagram.com/carruselab" style="color:var(--pink-light);text-decoration:none;">@carruselab</a></p>
+        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-weight:600;">v1.9 · <a href="https://instagram.com/carruselab" style="color:var(--pink-light);text-decoration:none;">@carruselab</a></p>
       </div>
 
     </div>
@@ -495,7 +505,7 @@ function restartApp(){
   // Rebuild splitUpload zone completely
   const zu=document.getElementById('splitUpload');
   zu.innerHTML='<div class="upload-icon">🖼️</div><div class="upload-title">Tocá para elegir una foto</div><div class="upload-sub">JPG, PNG o HEIC directo de tu cámara</div>';
-  zu.className='upload-zone';
+  zu.className='upload-zone small';
   // Re-attach event listeners (clone to remove old ones)
   const zuNew=zu.cloneNode(true);
   zu.parentNode.replaceChild(zuNew,zu);
@@ -517,7 +527,13 @@ function setMode(m){
 }
 
 // FORMATS
-const FORMATS={vertical:{w:1080,h:1350,label:'4:5'},square:{w:1080,h:1080,label:'1:1'},horizontal:{w:1080,h:566,label:'1.91:1'}};
+const FORMATS={
+  vertical:{w:1080,h:1350,label:'4:5'},
+  square:{w:1080,h:1080,label:'1:1'},
+  horizontal:{w:1080,h:566,label:'1.91:1'},
+  post:{w:1080,h:1440,label:'3:4'},
+  stories:{w:1080,h:1920,label:'9:16'}
+};
 let currentFmt='square';
 function getFmt(){return FORMATS[currentFmt];}
 function setFormat(fmt){
