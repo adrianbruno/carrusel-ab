@@ -153,7 +153,7 @@ input[type=file]{display:none;}
 .swatch-custom-preview{width:100%;height:100%;border-radius:50%;}
 
 /* Crop area */
-.crop-outer{position:relative;border-radius:var(--radius);overflow:hidden;border:2px solid var(--border2);cursor:grab;user-select:none;touch-action:none;background:#000;margin-bottom:4px;overscroll-behavior:contain;-webkit-user-select:none;}
+.crop-outer{position:relative;border-radius:var(--radius);overflow:hidden;border:2px solid var(--border2);cursor:grab;user-select:none;touch-action:none;background:#000;margin-bottom:4px;overscroll-behavior:contain;-webkit-user-select:none;max-height:45vh;}
 .crop-outer:active{cursor:grabbing;}
 .crop-canvas{display:block;width:100%;}
 .grid-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
@@ -341,14 +341,28 @@ input[type=file]{display:none;}
       <!-- ══ PASO 2 ══ -->
       <div class="step" id="step2">
 
-        <!-- Guide text -->
-        <div class="step2-guide">
-          <p>🎯 <strong>Ajustá el encuadre:</strong> arrastrá la imagen para moverla y usá el slider de abajo para hacer zoom. Los recuadros muestran cómo va a quedar cada slide.</p>
-        </div>
-
         <!-- Split editor -->
         <div id="splitEditorArea">
-          <div class="ctrl-row">
+          <!-- 1. Miniaturas (slices preview) -->
+          <div class="slices-row" id="sSlicesRow"></div>
+          <div class="dims-info" id="sSliceHint"></div>
+
+          <!-- 2. Área de encuadre -->
+          <div class="crop-outer" id="sCropOuter">
+            <canvas id="sCropCanvas"></canvas>
+            <svg class="grid-svg" id="sGridSvg"></svg>
+          </div>
+
+          <!-- 3. Barra de zoom -->
+          <div class="zoom-compact">
+            <button class="zoom-btn" id="sZoomOut">−</button>
+            <input type="range" class="zoom-track" id="sZoomSlider" min="10" max="300" step="1" value="100">
+            <button class="zoom-btn" id="sZoomIn">+</button>
+            <span class="zoom-val" id="sZoomVal">100%</span>
+          </div>
+
+          <!-- 4. Textos y controles -->
+          <div class="ctrl-row" style="margin-top:8px;">
             <span class="ctrl-label">Ancla:</span>
             <div class="anchor-btns">
               <button class="anchor-btn" data-ax="0" data-ay="0" onclick="setAnchor(0,0)"><div class="anchor-dot"><span class="hi"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></button>
@@ -372,39 +386,33 @@ input[type=file]{display:none;}
               </div>
             </div>
           </div>
-
-          <div class="editor-label">👆 Arrastrá para mover la imagen</div>
-          <div class="crop-outer" id="sCropOuter">
-            <canvas id="sCropCanvas"></canvas>
-            <svg class="grid-svg" id="sGridSvg"></svg>
-          </div>
-
-          <div class="slices-row" id="sSlicesRow"></div>
-          <div class="dims-info" id="sSliceHint"></div>
-
-          <!-- Zoom BELOW preview slices -->
-          <div class="zoom-compact">
-            <button class="zoom-btn" id="sZoomOut">−</button>
-            <input type="range" class="zoom-track" id="sZoomSlider" min="10" max="300" step="1" value="100">
-            <button class="zoom-btn" id="sZoomIn">+</button>
-            <span class="zoom-val" id="sZoomVal">100%</span>
-          </div>
-          <div class="hint">Reducí el zoom para ver la foto completa · el fondo de color se exporta</div>
+          <div class="hint">Arrastrá la imagen · reducí zoom para ver completa con fondo</div>
         </div>
 
         <!-- Multi editor -->
         <div id="multiEditorArea" class="hidden">
+          <!-- 1. Miniaturas -->
+          <div class="sort-grid" id="sortGridEditor" style="margin-bottom:8px;"></div>
+
+          <!-- 2. Área de encuadre -->
           <div class="crop-item-label"><strong id="mCropTitle">Foto 1</strong><span style="font-size:11px;color:var(--text3);">tocá miniatura para cambiar</span></div>
           <div class="crop-outer" id="mCropOuter"><canvas id="mCropCanvas"></canvas></div>
-          <div class="sort-grid" id="sortGridEditor" style="margin:6px 0;"></div>
-          <!-- Zoom BELOW thumbnails -->
+
+          <!-- 3. Barra de zoom -->
           <div class="zoom-compact">
             <button class="zoom-btn" id="mZoomOut">−</button>
             <input type="range" class="zoom-track" id="mZoomSlider" min="100" max="300" step="1" value="100">
             <button class="zoom-btn" id="mZoomIn">+</button>
             <span class="zoom-val" id="mZoomVal">100%</span>
           </div>
+
+          <!-- 4. Texto -->
           <div class="hint">Arrastrá la imagen para reencuadrar</div>
+        </div>
+
+        <!-- Guide text at bottom -->
+        <div class="step2-guide" style="margin-bottom:10px;">
+          <p>🎯 <strong>Ajustá el encuadre:</strong> arrastrá la imagen para moverla y usá el slider para hacer zoom.</p>
         </div>
 
         <!-- Advance hint -->
@@ -436,7 +444,7 @@ input[type=file]{display:none;}
         </div>
         <div class="tip" id="previewTip">Las fotos se descargan numeradas en orden — subílas así a Instagram 🚀</div>
         <button class="restart-btn" onclick="restartApp()">← Hacer otro carrusel</button>
-        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-weight:600;">v1.7 · <a href="https://instagram.com/carruselab" style="color:var(--pink-light);text-decoration:none;">@carruselab</a></p>
+        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-weight:600;">v1.8 · <a href="https://instagram.com/carruselab" style="color:var(--pink-light);text-decoration:none;">@carruselab</a></p>
       </div>
 
     </div>
@@ -603,7 +611,7 @@ function resizeBlob(file,cb){
         const c=document.createElement('canvas');c.width=Math.round(bm.width*sc);c.height=Math.round(bm.height*sc);
         c.getContext('2d').drawImage(bm,0,0,c.width,c.height);bm.close();
         const out=new Image();out.onload=()=>{showToast('');cb(out);};out.onerror=()=>showToast('Error al procesar');
-        out.src=c.toDataURL('image/jpeg',0.85);
+        out.src=c.toDataURL('image/jpeg',0.95);
       }catch(e){showToast('Error: '+e.message);}
     }).catch(()=>resizeViaFR(file,cb));
   }else resizeViaFR(file,cb);
@@ -611,7 +619,7 @@ function resizeBlob(file,cb){
 function resizeViaFR(file,cb){
   const r=new FileReader();r.onerror=()=>showToast('No se pudo leer el archivo');
   r.onload=ev=>{const img=new Image();img.onerror=()=>showToast('No se pudo procesar');img.onload=()=>{
-    try{const sc=Math.min(1,MAX_PX/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const out=new Image();out.onload=()=>{showToast('');cb(out);};out.src=c.toDataURL('image/jpeg',0.85);}
+    try{const sc=Math.min(1,MAX_PX/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const out=new Image();out.onload=()=>{showToast('');cb(out);};out.src=c.toDataURL('image/jpeg',0.95);}
     catch(e){showToast('Error: '+e.message);}
   };img.src=ev.target.result;};r.readAsDataURL(file);
 }
@@ -873,12 +881,12 @@ function updatePNav(){
 }
 
 // EXPORT
-function downloadAll(canvases){canvases.forEach((c,i)=>{setTimeout(()=>{const a=document.createElement('a');a.href=c.toDataURL('image/jpeg',.95);a.download=`carrusel_${String(i+1).padStart(2,'0')}.jpg`;a.click();},i*200);});}
-function canvasToBlob(c){return new Promise(res=>c.toBlob(b=>res(b),'image/jpeg',0.95));}
+function downloadAll(canvases){canvases.forEach((c,i)=>{setTimeout(()=>{const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download=`carrusel_${String(i+1).padStart(2,'0')}.png`;a.click();},i*200);});}
+function canvasToBlob(c){return new Promise(res=>c.toBlob(b=>res(b),'image/png'));}
 async function shareFiles(canvases,prefix){
   showToast('Preparando...',true);
   try{
-    const files=await Promise.all(canvases.map(async(c,i)=>{const blob=await canvasToBlob(c);return new File([blob],`${prefix}_${String(i+1).padStart(2,'0')}.jpg`,{type:'image/jpeg'});}));
+    const files=await Promise.all(canvases.map(async(c,i)=>{const blob=await canvasToBlob(c);return new File([blob],`${prefix}_${String(i+1).padStart(2,'0')}.png`,{type:'image/png'});}));
     showToast('');await navigator.share({files,title:'Carrusel AB',text:'Creado con Carrusel AB'});
   }catch(e){showToast('');if(e.name!=='AbortError')showToast('No se pudo compartir');}
 }
