@@ -235,6 +235,7 @@ input[type=file]{display:none;}
 
 /* Preview phone bigger */
 .phone-frame-lg{background:#1a1626;border-radius:24px;border:2px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:0 20px 60px rgba(168,85,247,.25);width:100%;max-width:340px;margin:0 auto;}
+.c-viewport{max-height:45vw !important;}@media(min-width:640px){.c-viewport{max-height:none !important;}}
 
 /* Zoom bar for preview */
 .preview-zoom-bar{display:flex;align-items:center;gap:5px;padding:5px 8px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);margin-top:6px;}
@@ -363,7 +364,7 @@ input[type=file]{display:none;}
 
           <!-- Preview principal -->
           <div class="preview-main">
-            <div class="phone-frame-lg">
+            <div class="phone-frame-lg" style="max-width:min(280px,85vw);">
               <div class="ig-header"><div class="ig-avatar">AB</div><span class="ig-uname">carruselab</span><span class="ig-dots">···</span></div>
               <div class="c-viewport" id="previewViewport" style="overflow:hidden;">
                 <div class="c-track" id="previewTrack"></div>
@@ -394,7 +395,7 @@ input[type=file]{display:none;}
         </div>
         <div class="tip" id="previewTip">Las fotos se descargan numeradas en orden — subílas así a Instagram 🚀</div>
         <button class="restart-btn" onclick="restartApp()">← Hacer otro carrusel</button>
-        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-weight:600;">v2.0 · <a href="https://instagram.com/carruselab" style="color:var(--pink-light);text-decoration:none;">@carruselab</a></p>
+        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-weight:600;">v2.1 · <a href="https://instagram.com/carruselab" style="color:var(--pink-light);text-decoration:none;">@carruselab</a></p>
       </div>
 
     </div>
