@@ -12,7 +12,6 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/background-removal.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -417,10 +416,7 @@ input[type=file]{display:none;}
                 <span class="tool-icon">✦</span>
                 <span class="tool-label">Nitidez</span>
               </button>
-              <button class="edit-tool-btn" id="toolBg" onclick="selectTool('bg')">
-                <span class="tool-icon">✂️</span>
-                <span class="tool-label">Fondo</span>
-              </button>
+
             </div>
             <!-- Tool slider panel -->
             <div class="edit-panel show" id="editPanel">
@@ -431,14 +427,7 @@ input[type=file]{display:none;}
               </div>
               <button class="edit-reset" onclick="resetCurrentTool()">↺ Resetear</button>
             </div>
-            <!-- BG removal panel -->
-            <div class="edit-panel" id="bgPanel">
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button id="btnRemoveBg" style="flex:1;height:36px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer;" onclick="removeBgAction()">✨ Quitar fondo</button>
-                <button id="btnRestoreBg" style="flex:1;height:36px;border-radius:10px;border:1.5px solid var(--border2);background:none;color:var(--text2);font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer;" onclick="restoreBgAction()">↺ Restaurar</button>
-              </div>
-              <div id="bgStatus" style="font-size:11px;color:var(--text2);text-align:center;margin-top:6px;font-weight:700;min-height:16px;"></div>
-            </div>
+
             <div class="hint" style="margin-top:4px;">Arrastrá la imagen para moverla</div>
           </div>
         </div>
@@ -450,7 +439,7 @@ input[type=file]{display:none;}
         </div>
         <div class="tip" id="previewTip">Las fotos se descargan numeradas en orden — subílas así a Instagram 🚀</div>
         <button class="restart-btn" onclick="restartApp()">← Hacer otro carrusel</button>
-        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-weight:600;">v2.7 · <a href="https://instagram.com/carruselab" style="color:var(--pink-light);text-decoration:none;">@carruselab</a></p>
+        <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-weight:600;">v2.8 · <a href="https://instagram.com/carruselab" style="color:var(--pink-light);text-decoration:none;">@carruselab</a></p>
       </div>
 
     </div>
@@ -533,7 +522,7 @@ function restartApp(){
   zuNew.addEventListener('dragover',e=>{e.preventDefault();zuNew.classList.add('dragover');});
   zuNew.addEventListener('dragleave',()=>zuNew.classList.remove('dragover'));
   zuNew.addEventListener('drop',e=>{e.preventDefault();zuNew.classList.remove('dragover');if(e.dataTransfer.files[0])loadSImg(e.dataTransfer.files[0]);});
-  editAdj={bright:0,contrast:0,sat:0,sharp:0};currentTool='zoom';resetBgState();
+  editAdj={bright:0,contrast:0,sat:0,sharp:0};currentTool='zoom';
   checkStep1Ready();goStep(1);
 }
 
@@ -871,7 +860,7 @@ let previewCanvases=[];
 function renderStep2(){
   updateViewportAspect();
   pIdx=0;
-  editAdj={bright:0,contrast:0,sat:0,sharp:0};resetBgState();
+  editAdj={bright:0,contrast:0,sat:0,sharp:0};
   if(typeof selectTool==='function')setTimeout(()=>selectTool('zoom'),100);
   // Build canvases
   if(currentMode==='split'){
@@ -1111,7 +1100,6 @@ const toolConfig={
   contrast:{label:'Contraste',min:-100,max:100,step:1,default:0,unit:''},
   sat:     {label:'Color',min:-100,max:100,step:1,default:0,unit:''},
   sharp:   {label:'Nitidez',min:0,max:10,step:1,default:0,unit:''},
-  bg:      {label:'Fondo',min:0,max:0,step:1,default:0,unit:''}
 };
 
 function selectTool(tool){
@@ -1120,12 +1108,8 @@ function selectTool(tool){
   const btn=document.getElementById('tool'+tool.charAt(0).toUpperCase()+tool.slice(1));
   if(btn)btn.classList.add('active');
   const cfg=toolConfig[tool];
-  // Show/hide panels
   const ep=document.getElementById('editPanel');
-  const bp=document.getElementById('bgPanel');
-  if(ep)ep.classList.toggle('show',tool!=='bg');
-  if(bp)bp.classList.toggle('show',tool==='bg');
-  if(tool==='bg')return;
+  if(ep)ep.classList.add('show');
   document.getElementById('editLabel').textContent=cfg.label;
   const sl=document.getElementById('pvZoomSlider');
   sl.min=cfg.min;sl.max=cfg.max;sl.step=cfg.step;
@@ -1187,142 +1171,14 @@ function applyImageAdjustments(){
 }
 
 // ── BACKGROUND REMOVAL ──
-let originalCanvases={}; // backup before bg removal
 
 function getActiveSlideCanvas(){
   const slides=document.querySelectorAll('#previewTrack .c-slide canvas');
   return slides[pIdx]||null;
 }
 
-async function removeBgAction(){
-  const status=document.getElementById('bgStatus');
-  const btn=document.getElementById('btnRemoveBg');
-  if(!previewCanvases[pIdx]){status.textContent='No hay imagen';return;}
-
-  // Backup original
-  if(!originalCanvases[pIdx]){
-    const orig=document.createElement('canvas');
-    orig.width=previewCanvases[pIdx].width;orig.height=previewCanvases[pIdx].height;
-    orig.getContext('2d').drawImage(previewCanvases[pIdx],0,0);
-    originalCanvases[pIdx]=orig;
-  }
-
-  btn.disabled=true;
-  status.textContent='⏳ Procesando con IA...';
-
-  try{
-    const src=previewCanvases[pIdx];
-    // Resize to smaller for API (max 512px to stay within limits)
-    const maxPx=512;
-    const scale=Math.min(1,maxPx/Math.max(src.width,src.height));
-    const small=document.createElement('canvas');
-    small.width=Math.round(src.width*scale);
-    small.height=Math.round(src.height*scale);
-    small.getContext('2d').drawImage(src,0,0,small.width,small.height);
-    const b64=small.toDataURL('image/jpeg',0.85).split(',')[1];
-
-    // Use Claude API to identify background mask
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-opus-4-5',
-        max_tokens:1024,
-        messages:[{
-          role:'user',
-          content:[
-            {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
-            {type:'text',text:'Analyze this image. Return ONLY a JSON object with a single key "hasPerson" (boolean) and "bgColor" (the dominant background color as hex). No explanation.'}
-          ]
-        }]
-      })
-    });
-    const data=await resp.json();
-    const txt=data.content?.[0]?.text||'{}';
-    let info={};
-    try{info=JSON.parse(txt.replace(/```json|```/g,'').trim());}catch(e){}
-
-    // Apply simple bg removal using canvas color detection
-    applySimpleBgRemoval(src,info.bgColor||'#ffffff');
-    status.textContent='✅ ¡Fondo eliminado!';
-    btn.disabled=false;
-
-  }catch(err){
-    // Fallback: simple color-based removal
-    console.error(err);
-    status.textContent='⏳ Aplicando método alternativo...';
-    applySimpleBgRemoval(previewCanvases[pIdx],null);
-    status.textContent='✅ Fondo eliminado (modo básico)';
-    btn.disabled=false;
-  }
-}
-
-function applySimpleBgRemoval(src,hintColor){
-  // Sample background color from corners
-  const ctx2=document.createElement('canvas');
-  ctx2.width=src.width;ctx2.height=src.height;
-  const c2=ctx2.getContext('2d');
-  c2.drawImage(src,0,0);
-  const id=c2.getImageData(0,0,src.width,src.height);
-  const d=id.data;
-  const w=src.width,h=src.height;
-
-  // Sample corners to get bg color
-  function px(x,y){const i=(y*w+x)*4;return[d[i],d[i+1],d[i+2]];}
-  const corners=[px(0,0),px(w-1,0),px(0,h-1),px(w-1,h-1),
-                 px(Math.floor(w/2),0),px(0,Math.floor(h/2))];
-  const bgR=Math.round(corners.reduce((a,c)=>a+c[0],0)/corners.length);
-  const bgG=Math.round(corners.reduce((a,c)=>a+c[1],0)/corners.length);
-  const bgB=Math.round(corners.reduce((a,c)=>a+c[2],0)/corners.length);
-  const thresh=55;
-
-  // Make pixels matching bg color transparent
-  for(let i=0;i<d.length;i+=4){
-    const dr=Math.abs(d[i]-bgR),dg=Math.abs(d[i+1]-bgG),db=Math.abs(d[i+2]-bgB);
-    if(dr+dg+db<thresh*3){
-      // Fade out based on distance from bg color
-      const dist=(dr+dg+db)/(thresh*3);
-      d[i+3]=Math.round(d[i+3]*dist*2);
-    }
-  }
-  c2.putImageData(id,0,0);
-
-  // Update preview at full size
-  const out=document.createElement('canvas');
-  out.width=src.width;out.height=src.height;
-  out.getContext('2d').drawImage(ctx2,0,0);
-  previewCanvases[pIdx]=out;
-
-  const slides=document.querySelectorAll('#previewTrack .c-slide canvas');
-  if(slides[pIdx]){
-    slides[pIdx].width=out.width;slides[pIdx].height=out.height;
-    const sc=slides[pIdx].getContext('2d');
-    sc.clearRect(0,0,out.width,out.height);
-    sc.drawImage(out,0,0);
-  }
-  renderThumbStrip();
-}
-
-function restoreBgAction(){
-  if(!originalCanvases[pIdx]){
-    document.getElementById('bgStatus').textContent='No hay original guardado';
-    return;
-  }
-  const orig=originalCanvases[pIdx];
-  previewCanvases[pIdx]=orig;
-  const slides=document.querySelectorAll('#previewTrack .c-slide canvas');
-  if(slides[pIdx]){
-    slides[pIdx].width=orig.width;slides[pIdx].height=orig.height;
-    slides[pIdx].getContext('2d').drawImage(orig,0,0);
-  }
-  originalCanvases[pIdx]=null;
-  renderThumbStrip();
-  document.getElementById('bgStatus').textContent='↺ Original restaurado';
-}
-
 // Reset bg backups on new image
 // (called in restartApp and renderStep2)
-function resetBgState(){originalCanvases={};}
 
 // Bake adjustments into canvases before export
 function bakeAdjustments(canvases){
