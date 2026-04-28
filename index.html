@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Carrusel AB</title>
 <meta name="theme-color" content="#FF6B9D">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Carrusel AB">
@@ -399,6 +400,31 @@ input[type=file]{display:none;}
     </div>
   </div>
 </div>
+
+<!-- Hidden editor elements (used by JS internally) -->
+<div style="display:none;" aria-hidden="true">
+  <canvas id="sCropCanvas"></canvas>
+  <svg id="sGridSvg"></svg>
+  <div id="sCropOuter"></div>
+  <div id="sSlicesRow"></div>
+  <div id="sSliceHint"></div>
+  <input type="range" id="sZoomSlider" min="10" max="300" value="100">
+  <span id="sZoomVal"></span>
+  <canvas id="mCropCanvas"></canvas>
+  <div id="mCropOuter"></div>
+  <input type="range" id="mZoomSlider" min="100" max="300" value="100">
+  <span id="mZoomVal"></span>
+  <span id="mCropTitle"></span>
+  <div id="sortGridEditor"></div>
+  <input type="color" id="colorPicker" value="#e8c4b8">
+  <div id="swatchPreview"></div>
+  <div id="swatchCustom"></div>
+  <button id="sZoomOut"></button>
+  <button id="sZoomIn"></button>
+  <button id="mZoomOut"></button>
+  <button id="mZoomIn"></button>
+</div>
+
 <div id="toast" style="opacity:0;"></div>
 
 <script>
