@@ -243,6 +243,23 @@ input[type=file]{display:none;}
 /* c-slide inner */
 .c-slide canvas{transform-origin:center center;cursor:grab;transition:none;}
 .c-slide canvas:active{cursor:grabbing;}
+
+/* ── EDIT TOOLBAR ── */
+.edit-toolbar{display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap;}
+.edit-tool-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 10px;border-radius:12px;border:1.5px solid var(--border2);background:var(--card);cursor:pointer;transition:all .15s;min-width:52px;font-family:var(--font);}
+.edit-tool-btn:hover{border-color:var(--pink);background:var(--pink-bg);}
+.edit-tool-btn.active{border-color:var(--pink);background:var(--pink-bg);}
+.edit-tool-btn .tool-icon{font-size:18px;line-height:1;}
+.edit-tool-btn .tool-label{font-size:9px;font-weight:800;color:var(--text2);letter-spacing:.03em;text-transform:uppercase;}
+.edit-tool-btn.active .tool-label{color:var(--pink-light);}
+.edit-panel{display:none;background:var(--bg3);border-radius:12px;padding:10px 14px;margin-top:8px;border:1px solid var(--border);}
+.edit-panel.show{display:block;}
+.edit-panel-row{display:flex;align-items:center;gap:10px;}
+.edit-panel-label{font-size:11px;font-weight:800;color:var(--text2);min-width:52px;}
+.edit-panel-val{font-size:11px;font-weight:800;color:var(--pink-light);min-width:36px;text-align:right;}
+.edit-panel input[type=range]{flex:1;accent-color:var(--pink);}
+.edit-reset{font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;margin-top:6px;display:block;width:100%;text-align:center;}
+.edit-reset:hover{color:var(--pink-light);}
 </style>
 </head>
 <body>
@@ -377,14 +394,39 @@ input[type=file]{display:none;}
               <div class="ig-cap"><strong>carruselab</strong> Tu descripción aquí ✨</div>
             </div>
 
-            <!-- Zoom bar -->
-            <div class="preview-zoom-bar">
-              <button class="zoom-btn" id="pvZoomOut">−</button>
-              <input type="range" class="zoom-track" id="pvZoomSlider" min="50" max="400" step="5" value="100">
-              <button class="zoom-btn" id="pvZoomIn">+</button>
-              <span class="zoom-val" id="pvZoomVal">100%</span>
+            <!-- Edit toolbar -->
+            <div class="edit-toolbar">
+              <button class="edit-tool-btn active" id="toolZoom" onclick="selectTool('zoom')">
+                <span class="tool-icon">🔍</span>
+                <span class="tool-label">Zoom</span>
+              </button>
+              <button class="edit-tool-btn" id="toolBright" onclick="selectTool('bright')">
+                <span class="tool-icon">☀️</span>
+                <span class="tool-label">Brillo</span>
+              </button>
+              <button class="edit-tool-btn" id="toolContrast" onclick="selectTool('contrast')">
+                <span class="tool-icon">◑</span>
+                <span class="tool-label">Contraste</span>
+              </button>
+              <button class="edit-tool-btn" id="toolSat" onclick="selectTool('sat')">
+                <span class="tool-icon">🎨</span>
+                <span class="tool-label">Color</span>
+              </button>
+              <button class="edit-tool-btn" id="toolSharp" onclick="selectTool('sharp')">
+                <span class="tool-icon">✦</span>
+                <span class="tool-label">Nitidez</span>
+              </button>
             </div>
-            <div class="hint" style="margin-top:4px;">Arrastrá la imagen para reencuadrar · zoom para acercar</div>
+            <!-- Tool slider panel -->
+            <div class="edit-panel show" id="editPanel">
+              <div class="edit-panel-row">
+                <span class="edit-panel-label" id="editLabel">Zoom</span>
+                <input type="range" id="pvZoomSlider" min="10" max="300" step="1" value="100">
+                <span class="edit-panel-val" id="pvZoomVal">100%</span>
+              </div>
+              <button class="edit-reset" onclick="resetCurrentTool()">↺ Resetear</button>
+            </div>
+            <div class="hint" style="margin-top:4px;">Arrastrá la imagen para moverla</div>
           </div>
         </div>
 
